@@ -1,0 +1,6 @@
+{
+    "fortran.linter.modOutput": "${workspaceFolder}/obj",
+    "fortran.fortls.directories": [
+        "${workspaceFolder}/src"
+    ]
+}

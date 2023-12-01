@@ -1,0 +1,35 @@
+name: Code quality
+
+on: [push]
+
+jobs:
+
+
+  runall:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Test GFortran
+      run: |
+        gfortran --version
+    - uses: actions/checkout@v3
+    - name: Make and run all binaries
+      run: |
+        make DEBUG= runall
+
+  runtests:
+    needs: runall
+    runs-on: ubuntu-latest
+    steps:
+    - name: Test GFortran
+      run: |
+        gfortran --version
+    - name: Install FRUITpy
+      run: |
+        python -m pip install --upgrade FRUITPy pip setuptools
+    - uses: actions/checkout@v3
+    - name: Make all tests
+      run: |
+        make DEBUG= tests
+    - name: Run FRUITpy tests
+      run: |
+        ./fruitpy.sh
