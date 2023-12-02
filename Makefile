@@ -63,6 +63,10 @@ $(OBJ)/%.o: $(SRC)/%.f90
 $(SRC)/fruit.f90:
 	curl -sS https://raw.githubusercontent.com/mortele/FRUIT/3d7f35351a41be2422e4f83364aa1d1c378bc6d2/src/fruit.f90 > $@
 
+# download regex.f90 from github.com
+$(SRC)/regex.f90:
+	curl -sS https://raw.githubusercontent.com/perazz/fortran-regex/83a409ca9443990759395731732733ded013e1f3/src/regex.f90 > $@
+
 # source code cloning rules
 # - using day01a as a template for day##a
 # - using day##a as a template for day##b
@@ -149,12 +153,12 @@ $(OBJ)/day01b_test_driver.o: $(OBJ)/day01b_test.o $(OBJ)/day01b.o $(OBJ)/util.o 
 $(BIN)/day01b: $(OBJ)/day01b_main.o $(OBJ)/day01b.o $(OBJ)/util.o
 $(BIN)/day01b_test_driver: $(OBJ)/day01b_test_driver.o $(OBJ)/day01b_test.o $(OBJ)/day01b.o $(OBJ)/util.o $(OBJ)/fruit.o
 
-# $(OBJ)/day02a.o: $(OBJ)/util.o
-# $(OBJ)/day02a_main.o: $(OBJ)/day02a.o $(OBJ)/util.o
-# $(OBJ)/day02a_test.o: $(OBJ)/day02a.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(OBJ)/day02a_test_driver.o: $(OBJ)/day02a_test.o $(OBJ)/day02a.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(BIN)/day02a: $(OBJ)/day02a_main.o $(OBJ)/day02a.o $(OBJ)/util.o
-# $(BIN)/day02a_test_driver: $(OBJ)/day02a_test_driver.o $(OBJ)/day02a_test.o $(OBJ)/day02a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day02a.o: $(OBJ)/util.o $(OBJ)/regex.o
+$(OBJ)/day02a_main.o: $(OBJ)/day02a.o $(OBJ)/util.o
+$(OBJ)/day02a_test.o: $(OBJ)/day02a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day02a_test_driver.o: $(OBJ)/day02a_test.o $(OBJ)/day02a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(BIN)/day02a: $(OBJ)/day02a_main.o $(OBJ)/day02a.o $(OBJ)/util.o $(OBJ)/regex.o
+$(BIN)/day02a_test_driver: $(OBJ)/day02a_test_driver.o $(OBJ)/day02a_test.o $(OBJ)/day02a.o $(OBJ)/util.o $(OBJ)/fruit.o $(OBJ)/regex.o
 
 # $(OBJ)/day02b.o: $(OBJ)/util.o
 # $(OBJ)/day02b_main.o: $(OBJ)/day02b.o $(OBJ)/util.o

@@ -1,4 +1,5 @@
 bin/*
 obj/*
 src/fruit.f90
+src/regex.f90
 __pycache__
