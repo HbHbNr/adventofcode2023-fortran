@@ -1,5 +1,5 @@
-!> Solution for https://adventofcode.com/2023/day/2 part a
-module day02a
+!> Solution for https://adventofcode.com/2023/day/2 part b
+module day02b
     use regex_module, only : regex
     use util, only : readinputfile_asstringarray
     implicit none
@@ -14,20 +14,22 @@ module day02a
 
 contains
 
-    function is_possible_game(orgline) result(possible_game)
+    function power_of_game(orgline) result(power)
         implicit none
 
         character(len=*), intent(in) :: orgline
-        logical                      :: possible_game
+        integer                      :: power
         ! type(regex_op)               :: re
         character(len=:), allocatable :: line
         character(len=*), parameter  :: re = '[0-9][0-9]? [rgb]'
-        integer                      :: indx, length, amount
+        integer                      :: indx, length, amount, red, green, blue
         character(len=1)             :: colour
 
         line = orgline
+        red = 0
+        green = 0
+        blue = 0
 
-        possible_game = .false.
         indx = regex(line, re, length)
         do while (indx > 0)
             if (length == 3) then
@@ -42,17 +44,17 @@ contains
 
             select case(colour)
             case ('r')
-                if (amount > red_cubes) return
+                red = max(red, amount)
             case ('g')
-                if (amount > green_cubes) return
+                green = max(green, amount)
             case ('b')
-                if (amount > blue_cubes) return
+                blue = max(blue, amount)
             end select
 
             line = line(indx + length:)
             indx = regex(line, re, length)
         end do
-        possible_game = .true.
+        power = red * green * blue
     end function
 
     integer function solve(filename)
@@ -60,16 +62,16 @@ contains
 
         character(len=*), intent(in)  :: filename
         character(len=:), allocatable :: lines(:)
-        integer                       :: i, possible_games
+        integer                       :: i, total_power
 
         lines = readinputfile_asstringarray(filename, maxlinelength)
 
-        possible_games = 0
+        total_power = 0
         do i = 1, size(lines)
-            if (is_possible_game(lines(i))) possible_games = possible_games + i
+            total_power = total_power + power_of_game(lines(i))
         end do
 
-        solve = possible_games
+        solve = total_power
     end function
 
-end module day02a
+end module day02b
