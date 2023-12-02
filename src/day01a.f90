@@ -22,7 +22,6 @@ contains
         calibration_value = 0
         do i = 1, size(lines)
             line = lines(i)
-            ! print *, line
             do j = 1, len_trim(line)
                 if (iachar(line(j:j)) >= code_0) then
                     if (iachar(line(j:j)) <= code_9) then
@@ -40,7 +39,6 @@ contains
                 end if
             end do
             calibration_value = calibration_value + digit
-            ! print *, digit, calibration_value
         end do
 
     end function sumnumbers
