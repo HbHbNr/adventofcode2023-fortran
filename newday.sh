@@ -12,6 +12,6 @@ make src/day${day}.f90
 make src/day${day}_main.f90
 make src/day${day}_test.f90
 make fruitpy/day${day}.py
-touch inputfiles/day${day}_example.txt
-touch inputfiles/day${day}_input.txt
-ls -l inputfiles/day${day}_*.txt
+touch inputfiles/day${day%?}_example.txt
+touch inputfiles/day${day%?}_input.txt
+ls -l inputfiles/day${day%?}_*.txt
