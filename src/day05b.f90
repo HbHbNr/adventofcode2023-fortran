@@ -1,5 +1,5 @@
-!> Solution for https://adventofcode.com/2023/day/5 part a
-module day05a
+!> Solution for https://adventofcode.com/2023/day/5 part b
+module day05b
     use iso_fortran_env, only : int64
     use util, only : readinputfile_asstringarray
     implicit none
@@ -92,8 +92,8 @@ contains
         character(len=:), allocatable :: line
         integer(int64), allocatable   :: seeds(:), map(:,:)
         integer                       :: i, j, digit, mapindexes(total_mappings), section
-        integer(int64)                :: oldvalue, nextvalue
-        integer                       :: seed, mapping
+        integer(int64)                :: seed, oldvalue, nextvalue
+        integer                       :: seedrangestart, mapping
 
         ! extract the seeds from first line
         seeds = extractseeds(lines(1)(8:))
@@ -123,17 +123,18 @@ contains
         ! print *, map
 
         lowest_location_number = huge(map)
-        do seed = 1, size(seeds)
-            oldvalue = seeds(seed)
-            ! print *, 'seed', seed, ':', oldvalue
+        do seedrangestart = 1, size(seeds), 2
+            do seed = seeds(seedrangestart), seeds(seedrangestart) + seeds(seedrangestart+1) - 1
+                oldvalue = seed
 
-            do mapping = 1, total_mappings
-                nextvalue = lookup(map, mapindexes, mapping, oldvalue)
-                oldvalue = nextvalue
+                do mapping = 1, total_mappings
+                    nextvalue = lookup(map, mapindexes, mapping, oldvalue)
+                    oldvalue = nextvalue
+                end do
+
+                lowest_location_number = min(lowest_location_number, nextvalue)
+                ! exit
             end do
-
-            lowest_location_number = min(lowest_location_number, nextvalue)
-            ! exit
         end do
     end function scan_alamanac
 
@@ -151,4 +152,4 @@ contains
         solve = lowest_location_number
     end function
 
-end module day05a
+end module day05b
