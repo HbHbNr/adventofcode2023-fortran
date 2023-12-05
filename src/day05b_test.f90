@@ -12,11 +12,9 @@ contains
         implicit none
 
         integer(int64) :: result
-        logical        :: isequal
 
         result = solve('../inputfiles/day05_example.txt')
-        isequal = 46 == result
-        call assert_equals (isequal, .true.)
+        call assert_true (46 == result)
     end subroutine
 
     subroutine test_solve_input
@@ -24,11 +22,9 @@ contains
         implicit none
 
         integer(int64) :: result
-        logical        :: isequal
 
         result = solve('../inputfiles/day05_input.txt')
-        isequal = 11554135 == result
-        call assert_equals (isequal, .true.)
+        call assert_equals (11554135 == result)
     end subroutine
 
 end module day05b_test

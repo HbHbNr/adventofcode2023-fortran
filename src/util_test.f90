@@ -149,4 +149,34 @@ contains
     !     end do
     ! end subroutine
 
+    subroutine test_string_extract_int64s
+        use iso_fortran_env, only : int64
+        use util, only : string_extract_int64s
+        implicit none
+
+        character(len=*), parameter :: string = '1716002126 3982609232 32819234'
+        integer(int64), allocatable   :: seeds(:)
+
+        call string_extract_int64s(string, seeds)
+
+        call assert_true (seeds(1) == 1716002126_int64)
+        call assert_true (seeds(2) == 3982609232_int64)
+        call assert_true (seeds(3) == 32819234_int64)
+    end subroutine
+
+    subroutine test_string_extract_integers
+        use util, only : string_extract_integers
+        implicit none
+
+        character(len=*), parameter :: string = '79 14 55 13'
+        integer, allocatable   :: seeds(:)
+
+        call string_extract_integers(string, seeds)
+
+        call assert_true (seeds(1) == 79)
+        call assert_true (seeds(2) == 14)
+        call assert_true (seeds(3) == 55)
+        call assert_true (seeds(4) == 13)
+    end subroutine
+
 end module util_test

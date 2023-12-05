@@ -1,7 +1,7 @@
 !> Solution for https://adventofcode.com/2023/day/5 part a
 module day05a
     use iso_fortran_env, only : int64
-    use util, only : readinputfile_asstringarray
+    use util, only : readinputfile_asstringarray, string_extract_int64s
     implicit none
     private
 
@@ -13,38 +13,6 @@ module day05a
     public :: solve
 
 contains
-
-    function extractseeds(line) result(seeds)
-        implicit none
-
-        character(len=*), intent(in) :: line
-        integer(int64), allocatable  :: seeds(:)
-        integer                      :: i, seedcount, laststart
-
-        ! print *, line
-        seedcount = 0
-        laststart = 1
-        do i = 2, len_trim(line)
-            if (line(i:i) == ' ') seedcount = seedcount + 1
-        end do
-        seedcount = seedcount + 1
-        ! print *, seedcount, ' seeds'
-
-        allocate(seeds(seedcount))
-
-        seedcount = 0
-        laststart = 1
-        do i = 2, len_trim(line)
-            if (line(i:i) == ' ') then
-                seedcount = seedcount + 1
-                read (line(laststart:i+1), *) seeds(seedcount)
-                laststart = i
-            end if
-        end do
-        read (line(laststart:), *) seeds(size(seeds))
-
-        ! print *, seeds
-    end function
 
     function lookup(map, mapindexes, mapping, oldvalue) result(nextvalue)
         implicit none
@@ -91,12 +59,12 @@ contains
         integer(int64)                :: lowest_location_number
         character(len=:), allocatable :: line
         integer(int64), allocatable   :: seeds(:), map(:,:)
-        integer                       :: i, j, digit, mapindexes(total_mappings), section
+        integer                       :: i, mapindexes(total_mappings), section
         integer(int64)                :: oldvalue, nextvalue
         integer                       :: seed, mapping
 
         ! extract the seeds from first line
-        seeds = extractseeds(lines(1)(8:))
+        call string_extract_int64s(lines(1)(8:), seeds)
 
         ! lookups are the whole file, empty lines are marked with -1
         allocate(map(size(lines), 3))

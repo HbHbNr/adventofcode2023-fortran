@@ -1,7 +1,7 @@
 !> Solution for https://adventofcode.com/2023/day/5 part b
 module day05b
     use iso_fortran_env, only : int64
-    use util, only : readinputfile_asstringarray
+    use util, only : readinputfile_asstringarray, string_extract_int64s
     implicit none
     private
 
@@ -91,12 +91,12 @@ contains
         integer(int64)                :: lowest_location_number
         character(len=:), allocatable :: line
         integer(int64), allocatable   :: seeds(:), map(:,:)
-        integer                       :: i, j, digit, mapindexes(total_mappings), section
+        integer                       :: i, mapindexes(total_mappings), section
         integer(int64)                :: seed, oldvalue, nextvalue
         integer                       :: seedrangestart, mapping
 
         ! extract the seeds from first line
-        seeds = extractseeds(lines(1)(8:))
+        call string_extract_int64s(lines(1)(8:), seeds)
 
         ! lookups are the whole file, empty lines are marked with -1
         allocate(map(size(lines), 3))
