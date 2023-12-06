@@ -64,6 +64,7 @@ contains
         call string_extract_int64s(lines(1)(8:), seeds)
 
         ! lookups are the whole file, first line and empty values are marked with -1
+        if (allocated(map)) deallocate(map)  ! needed for unit testing
         allocate(map(size(lines), 3))
         map(1,:) = -1
 
