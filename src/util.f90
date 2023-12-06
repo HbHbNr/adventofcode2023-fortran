@@ -351,6 +351,7 @@ contains
         laststart = 1
         do i = 2, len_trim(string)
             if (string(i:i) == ' ') then
+                if (i < len_trim(string) .and. string(i+1:i+1) == ' ') cycle
                 numbercount = numbercount + 1
                 read (string(laststart:i+1), *) numbers(numbercount)
                 laststart = i
