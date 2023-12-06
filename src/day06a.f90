@@ -5,8 +5,6 @@ module day06a
     private
 
     integer, parameter :: maxlinelength = 36
-    integer, parameter :: code_0 = iachar('0')
-    integer, parameter :: code_9 = iachar('9')
 
     public :: solve
 
@@ -23,16 +21,12 @@ contains
         margin = 1
         call string_extract_integers(lines(1)(12:), times)
         call string_extract_integers(lines(2)(12:), distances)
-        print *, times
-        print *, distances
         do i = 1, size(times)
             solutions = 0
             do second = 0, times(i)
-                ! print *, (times(i) - second) * second
                 if ((times(i) - second) * second > distances(i)) then
                     solutions = solutions + 1
                 end if
-                ! print *, solutions, ' solutions'
             end do
             margin = margin * solutions
         end do

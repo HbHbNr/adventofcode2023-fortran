@@ -2,7 +2,11 @@
 module util
     use iso_fortran_env, only : int32, int64
     implicit none
+
     private
+
+    integer, parameter, public :: code_0 = iachar('0')
+    integer, parameter, public :: code_9 = iachar('9')
 
     public :: printarray
     public :: printresultline_integer
@@ -301,30 +305,32 @@ contains
 
         character(len=*), intent(in)             :: string
         integer(int64), allocatable, intent(out) :: numbers(:)
-        integer                                  :: i, numbercount, laststart
+        integer                           :: i, numbercount
+        logical                           :: gap
 
         ! count amount of numbers
         numbercount = 0
-        laststart = 1
-        do i = 2, len_trim(string)
-            if (string(i:i) == ' ') numbercount = numbercount + 1
+        gap = .true.
+        do i = 1, len_trim(string)
+            if (iachar(string(i:i)) >= code_0) then
+                if (iachar(string(i:i)) <= code_9) then
+                    ! current character is a number
+                    if (gap) then
+                        numbercount = numbercount + 1
+                        gap = .false.
+                    end if
+                    cycle
+                end if
+            end if
+            ! current character is not a number
+            gap = .true.
         end do
-        numbercount = numbercount + 1
 
         ! prepare array
         allocate(numbers(numbercount))
 
         ! read numbers into array
-        numbercount = 0
-        laststart = 1
-        do i = 2, len_trim(string)
-            if (string(i:i) == ' ') then
-                numbercount = numbercount + 1
-                read (string(laststart:i+1), *) numbers(numbercount)
-                laststart = i
-            end if
-        end do
-        read (string(laststart:), *) numbers(size(numbers))
+        read (string, *) numbers(:)
     end subroutine
 
     !> prepare an array and fill it with integers extracted from a string
@@ -333,31 +339,32 @@ contains
 
         character(len=*), intent(in)      :: string
         integer, allocatable, intent(out) :: numbers(:)
-        integer                           :: i, numbercount, laststart
+        integer                           :: i, numbercount
+        logical                           :: gap
 
         ! count amount of numbers
         numbercount = 0
-        laststart = 1
-        do i = 2, len_trim(string)
-            if (string(i:i) == ' ') numbercount = numbercount + 1
+        gap = .true.
+        do i = 1, len_trim(string)
+            if (iachar(string(i:i)) >= code_0) then
+                if (iachar(string(i:i)) <= code_9) then
+                    ! current character is a number
+                    if (gap) then
+                        numbercount = numbercount + 1
+                        gap = .false.
+                    end if
+                    cycle
+                end if
+            end if
+            ! current character is not a number
+            gap = .true.
         end do
-        numbercount = numbercount + 1
 
         ! prepare array
         allocate(numbers(numbercount))
 
         ! read numbers into array
-        numbercount = 0
-        laststart = 1
-        do i = 2, len_trim(string)
-            if (string(i:i) == ' ') then
-                if (i < len_trim(string) .and. string(i+1:i+1) == ' ') cycle
-                numbercount = numbercount + 1
-                read (string(laststart:i+1), *) numbers(numbercount)
-                laststart = i
-            end if
-        end do
-        read (string(laststart:), *) numbers(size(numbers))
+        read (string, *) numbers(:)
     end subroutine
 
 end module util

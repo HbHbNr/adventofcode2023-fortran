@@ -154,29 +154,49 @@ contains
         use util, only : string_extract_int64s
         implicit none
 
-        character(len=*), parameter :: string = '1716002126 3982609232 32819234'
-        integer(int64), allocatable   :: seeds(:)
+        character(len=*), parameter :: string1 = '1716002126 3982609232 32819234'
+        integer(int64), allocatable   :: seeds1(:)
+        character(len=*), parameter :: string2 = ' 1187290020,247767461 40283135 64738286  2044483296 66221787   '
+        integer(int64), allocatable   :: seeds2(:)
 
-        call string_extract_int64s(string, seeds)
+        call string_extract_int64s(string1, seeds1)
 
-        call assert_true (seeds(1) == 1716002126_int64)
-        call assert_true (seeds(2) == 3982609232_int64)
-        call assert_true (seeds(3) == 32819234_int64)
+        call assert_true (seeds1(1) == 1716002126_int64)
+        call assert_true (seeds1(2) == 3982609232_int64)
+        call assert_true (seeds1(3) == 32819234_int64)
+
+        call string_extract_int64s(string2, seeds2)
+
+        call assert_true (seeds2(1) == 1187290020_int64)
+        call assert_true (seeds2(2) == 247767461_int64)
+        call assert_true (seeds2(3) == 40283135_int64)
+        call assert_true (seeds2(4) == 64738286_int64)
+        call assert_true (seeds2(5) == 2044483296_int64)
+        call assert_true (seeds2(6) == 66221787_int64)
     end subroutine
 
     subroutine test_string_extract_integers
         use util, only : string_extract_integers
         implicit none
 
-        character(len=*), parameter :: string = '79 14 55 13'
-        integer, allocatable   :: seeds(:)
+        character(len=*), parameter :: string1 = '79 14 55 13'
+        integer, allocatable   :: seeds1(:)
+        character(len=*), parameter :: string2 = '    40     82     91     66'
+        integer, allocatable   :: seeds2(:)
 
-        call string_extract_integers(string, seeds)
+        call string_extract_integers(string1, seeds1)
 
-        call assert_true (seeds(1) == 79)
-        call assert_true (seeds(2) == 14)
-        call assert_true (seeds(3) == 55)
-        call assert_true (seeds(4) == 13)
+        call assert_true (seeds1(1) == 79)
+        call assert_true (seeds1(2) == 14)
+        call assert_true (seeds1(3) == 55)
+        call assert_true (seeds1(4) == 13)
+
+        call string_extract_integers(string2, seeds2)
+
+        call assert_true (seeds2(1) == 40)
+        call assert_true (seeds2(2) == 82)
+        call assert_true (seeds2(3) == 91)
+        call assert_true (seeds2(4) == 66)
     end subroutine
 
 end module util_test
