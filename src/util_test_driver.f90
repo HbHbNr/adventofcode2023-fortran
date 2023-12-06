@@ -20,6 +20,8 @@ program tests
   call run_test_case(test_printresultline,"test_printresultline")
   call run_test_case(test_readinputfile_asline_example,"test_readinputfile_asline_example")
   call run_test_case(test_readinputfile_asline_input,"test_readinputfile_asline_input")
+  call run_test_case(test_string_extract_int64s,"test_string_extract_int64s")
+  call run_test_case(test_string_extract_integers,"test_string_extract_integers")
 
   call get_failed_count(failed_count)
   call fruit_summary

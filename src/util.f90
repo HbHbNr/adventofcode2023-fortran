@@ -13,6 +13,8 @@ module util
     public :: readinputfile_asline
     public :: readinputfile_asstringarray
     public :: readinputfile_asintarray
+    public :: string_extract_int64s
+    public :: string_extract_integers
 
 contains
 
@@ -292,5 +294,69 @@ contains
         deallocate(tmpintarray)
         close(io)
     end function
+
+    !> prepare an array and fill it with int64 integers extracted from a string
+    subroutine string_extract_int64s(string, numbers)
+        implicit none
+
+        character(len=*), intent(in)             :: string
+        integer(int64), allocatable, intent(out) :: numbers(:)
+        integer                                  :: i, numbercount, laststart
+
+        ! count amount of numbers
+        numbercount = 0
+        laststart = 1
+        do i = 2, len_trim(string)
+            if (string(i:i) == ' ') numbercount = numbercount + 1
+        end do
+        numbercount = numbercount + 1
+
+        ! prepare array
+        allocate(numbers(numbercount))
+
+        ! read numbers into array
+        numbercount = 0
+        laststart = 1
+        do i = 2, len_trim(string)
+            if (string(i:i) == ' ') then
+                numbercount = numbercount + 1
+                read (string(laststart:i+1), *) numbers(numbercount)
+                laststart = i
+            end if
+        end do
+        read (string(laststart:), *) numbers(size(numbers))
+    end subroutine
+
+    !> prepare an array and fill it with integers extracted from a string
+    subroutine string_extract_integers(string, numbers)
+        implicit none
+
+        character(len=*), intent(in)      :: string
+        integer, allocatable, intent(out) :: numbers(:)
+        integer                           :: i, numbercount, laststart
+
+        ! count amount of numbers
+        numbercount = 0
+        laststart = 1
+        do i = 2, len_trim(string)
+            if (string(i:i) == ' ') numbercount = numbercount + 1
+        end do
+        numbercount = numbercount + 1
+
+        ! prepare array
+        allocate(numbers(numbercount))
+
+        ! read numbers into array
+        numbercount = 0
+        laststart = 1
+        do i = 2, len_trim(string)
+            if (string(i:i) == ' ') then
+                numbercount = numbercount + 1
+                read (string(laststart:i+1), *) numbers(numbercount)
+                laststart = i
+            end if
+        end do
+        read (string(laststart:), *) numbers(size(numbers))
+    end subroutine
 
 end module util
