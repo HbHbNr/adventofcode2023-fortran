@@ -1,12 +1,10 @@
 !> Solution for https://adventofcode.com/2023/day/1 part a
 module day01a
-    use util, only : readinputfile_asstringarray
+    use util, only : readinputfile_asstringarray, code_0, code_9
     implicit none
     private
 
     integer, parameter :: maxlinelength = 60
-    integer, parameter :: code_0 = iachar('0')
-    integer, parameter :: code_9 = iachar('9')
 
     public :: solve
 
