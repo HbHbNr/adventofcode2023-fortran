@@ -208,19 +208,19 @@ $(OBJ)/day05b_test_driver.o: $(OBJ)/day05b_test.o $(OBJ)/day05b.o $(OBJ)/util.o 
 $(BIN)/day05b: $(OBJ)/day05b_main.o $(OBJ)/day05b.o $(OBJ)/util.o
 $(BIN)/day05b_test_driver: $(OBJ)/day05b_test_driver.o $(OBJ)/day05b_test.o $(OBJ)/day05b.o $(OBJ)/util.o $(OBJ)/fruit.o
 
-# $(OBJ)/day06a.o: $(OBJ)/util.o
-# $(OBJ)/day06a_main.o: $(OBJ)/day06a.o $(OBJ)/util.o
-# $(OBJ)/day06a_test.o: $(OBJ)/day06a.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(OBJ)/day06a_test_driver.o: $(OBJ)/day06a_test.o $(OBJ)/day06a.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(BIN)/day06a: $(OBJ)/day06a_main.o $(OBJ)/day06a.o $(OBJ)/util.o
-# $(BIN)/day06a_test_driver: $(OBJ)/day06a_test_driver.o $(OBJ)/day06a_test.o $(OBJ)/day06a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day06a.o: $(OBJ)/util.o
+$(OBJ)/day06a_main.o: $(OBJ)/day06a.o $(OBJ)/util.o
+$(OBJ)/day06a_test.o: $(OBJ)/day06a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day06a_test_driver.o: $(OBJ)/day06a_test.o $(OBJ)/day06a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(BIN)/day06a: $(OBJ)/day06a_main.o $(OBJ)/day06a.o $(OBJ)/util.o
+$(BIN)/day06a_test_driver: $(OBJ)/day06a_test_driver.o $(OBJ)/day06a_test.o $(OBJ)/day06a.o $(OBJ)/util.o $(OBJ)/fruit.o
 
-# $(OBJ)/day06b.o: $(OBJ)/util.o
-# $(OBJ)/day06b_main.o: $(OBJ)/day06b.o $(OBJ)/util.o
-# $(OBJ)/day06b_test.o: $(OBJ)/day06b.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(OBJ)/day06b_test_driver.o: $(OBJ)/day06b_test.o $(OBJ)/day06b.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(BIN)/day06b: $(OBJ)/day06b_main.o $(OBJ)/day06b.o $(OBJ)/util.o
-# $(BIN)/day06b_test_driver: $(OBJ)/day06b_test_driver.o $(OBJ)/day06b_test.o $(OBJ)/day06b.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day06b.o: $(OBJ)/util.o
+$(OBJ)/day06b_main.o: $(OBJ)/day06b.o $(OBJ)/util.o
+$(OBJ)/day06b_test.o: $(OBJ)/day06b.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day06b_test_driver.o: $(OBJ)/day06b_test.o $(OBJ)/day06b.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(BIN)/day06b: $(OBJ)/day06b_main.o $(OBJ)/day06b.o $(OBJ)/util.o
+$(BIN)/day06b_test_driver: $(OBJ)/day06b_test_driver.o $(OBJ)/day06b_test.o $(OBJ)/day06b.o $(OBJ)/util.o $(OBJ)/fruit.o
 
 # $(OBJ)/day07a.o: $(OBJ)/util.o
 # $(OBJ)/day07a_main.o: $(OBJ)/day07a.o $(OBJ)/util.o
