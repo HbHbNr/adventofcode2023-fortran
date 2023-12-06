@@ -9,62 +9,26 @@ module day05b
     integer, parameter :: code_0 = iachar('0')
     integer, parameter :: code_9 = iachar('9')
     integer, parameter :: total_mappings = 7
+    integer(int64), allocatable :: seeds(:), map(:,:)
+    integer                     :: mapindexes(total_mappings, 2)
 
     public :: solve
 
 contains
 
-    function extractseeds(line) result(seeds)
+    function lookup(mapping, oldvalue) result(nextvalue)
         implicit none
 
-        character(len=*), intent(in) :: line
-        integer(int64), allocatable  :: seeds(:)
-        integer                      :: i, seedcount, laststart
-
-        ! print *, line
-        seedcount = 0
-        laststart = 1
-        do i = 2, len_trim(line)
-            if (line(i:i) == ' ') seedcount = seedcount + 1
-        end do
-        seedcount = seedcount + 1
-        ! print *, seedcount, ' seeds'
-
-        allocate(seeds(seedcount))
-
-        seedcount = 0
-        laststart = 1
-        do i = 2, len_trim(line)
-            if (line(i:i) == ' ') then
-                seedcount = seedcount + 1
-                read (line(laststart:i+1), *) seeds(seedcount)
-                laststart = i
-            end if
-        end do
-        read (line(laststart:), *) seeds(size(seeds))
-
-        ! print *, seeds
-    end function
-
-    function lookup(map, mapindexes, mapping, oldvalue) result(nextvalue)
-        implicit none
-
-        integer(int64), intent(in)   :: map(:,:)
-        integer, intent(in)          :: mapindexes(:)
         integer, intent(in)          :: mapping
         integer(int64), intent(in)   :: oldvalue
         integer(int64)               :: nextvalue
         integer                      :: i, from, to
 
-        from = mapindexes(mapping)
-        if (mapping < total_mappings) then
-            to = mapindexes(mapping + 1) - 3
-        else
-            to = size(map, 1)
-        end if
-        ! print *, from, to
+        from = mapindexes(mapping, 1)
+        to = mapindexes(mapping, 2)
 
-        nextvalue = -1
+        ! if not mapping is found, keep the old value
+        nextvalue = oldvalue
         iloop: do i = from, to
             ! print *, map(i, 1), map(i, 2), map(i, 3)
             if (oldvalue >= map(i, 2)) then
@@ -74,15 +38,17 @@ contains
                 end if
             end if
         end do iloop
-        if(nextvalue == -1) then
-            ! no mapping, value stays the same
-            ! print *, 'did not find oldvalue', oldvalue, ', will keep it'
-            nextvalue = oldvalue
-            ! print *, 'copy', nextvalue
-        else
-            ! print *, 'found', nextvalue
-        end if
     end function
+
+    subroutine print_map()
+        implicit none
+
+        integer :: i
+
+        do i = 1, size(map, 1)
+            print *, map(i,:)
+        end do
+    end subroutine
 
     function scan_alamanac(lines) result(lowest_location_number)
         implicit none
@@ -90,18 +56,16 @@ contains
         character(len=*), intent(in)  :: lines(:)
         integer(int64)                :: lowest_location_number
         character(len=:), allocatable :: line
-        integer(int64), allocatable   :: seeds(:), map(:,:)
-        integer                       :: i, mapindexes(total_mappings), section
+        integer                       :: i, section
         integer(int64)                :: seed, oldvalue, nextvalue
         integer                       :: seedrangestart, mapping
 
         ! extract the seeds from first line
         call string_extract_int64s(lines(1)(8:), seeds)
 
-        ! lookups are the whole file, empty lines are marked with -1
+        ! lookups are the whole file, first line and empty values are marked with -1
         allocate(map(size(lines), 3))
-        map(:,:) = -1
-        mapindexes(:) = 0
+        map(1,:) = -1
 
         ! read sections
         section = 0
@@ -111,8 +75,8 @@ contains
                 section = section + 1
                 ! print *, 'new section', section
             else if (iachar(line(1:1)) > code_9) then
-                mapindexes(section) = i + 1
-                ! print *, section, ': "', line, '"', mapindexes(section)
+                mapindexes(section, 1) = i + 1
+                ! print *, section, ': "', line, '"', mapindexes(section, 1)
             else
                 ! lookup line
                 ! print *, line
@@ -120,7 +84,13 @@ contains
                 ! print *, map(i,1), map(i,2), map(i,3)
             end if
         end do
-        ! print *, map
+        ! call print_map()
+
+        ! calc end of each section
+        do section = 1, total_mappings - 1
+            mapindexes(section, 2) = mapindexes(section + 1, 1) - 3
+        end do
+        mapindexes(total_mappings, 2) = size(map, 1)
 
         lowest_location_number = huge(map)
         do seedrangestart = 1, size(seeds), 2
@@ -128,12 +98,11 @@ contains
                 oldvalue = seed
 
                 do mapping = 1, total_mappings
-                    nextvalue = lookup(map, mapindexes, mapping, oldvalue)
+                    nextvalue = lookup(mapping, oldvalue)
                     oldvalue = nextvalue
                 end do
 
                 lowest_location_number = min(lowest_location_number, nextvalue)
-                ! exit
             end do
         end do
     end function scan_alamanac
