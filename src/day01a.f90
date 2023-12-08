@@ -12,6 +12,7 @@ contains
 
     function sumnumbers(lines) result(calibration_value)
         implicit none
+
         character(len=*), intent(in)  :: lines(:)
         integer                       :: calibration_value
         character(len=:), allocatable :: line
