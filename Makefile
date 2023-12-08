@@ -236,12 +236,12 @@ $(BIN)/day07a_test_driver: $(OBJ)/day07a_test_driver.o $(OBJ)/day07a_test.o $(OB
 # $(BIN)/day07b: $(OBJ)/day07b_main.o $(OBJ)/day07b.o $(OBJ)/util.o
 # $(BIN)/day07b_test_driver: $(OBJ)/day07b_test_driver.o $(OBJ)/day07b_test.o $(OBJ)/day07b.o $(OBJ)/util.o $(OBJ)/fruit.o
 
-# $(OBJ)/day08a.o: $(OBJ)/util.o
-# $(OBJ)/day08a_main.o: $(OBJ)/day08a.o $(OBJ)/util.o
-# $(OBJ)/day08a_test.o: $(OBJ)/day08a.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(OBJ)/day08a_test_driver.o: $(OBJ)/day08a_test.o $(OBJ)/day08a.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(BIN)/day08a: $(OBJ)/day08a_main.o $(OBJ)/day08a.o $(OBJ)/util.o
-# $(BIN)/day08a_test_driver: $(OBJ)/day08a_test_driver.o $(OBJ)/day08a_test.o $(OBJ)/day08a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day08a.o: $(OBJ)/util.o
+$(OBJ)/day08a_main.o: $(OBJ)/day08a.o $(OBJ)/util.o
+$(OBJ)/day08a_test.o: $(OBJ)/day08a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day08a_test_driver.o: $(OBJ)/day08a_test.o $(OBJ)/day08a.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(BIN)/day08a: $(OBJ)/day08a_main.o $(OBJ)/day08a.o $(OBJ)/util.o
+$(BIN)/day08a_test_driver: $(OBJ)/day08a_test_driver.o $(OBJ)/day08a_test.o $(OBJ)/day08a.o $(OBJ)/util.o $(OBJ)/fruit.o
 
 # $(OBJ)/day08b.o: $(OBJ)/util.o
 # $(OBJ)/day08b_main.o: $(OBJ)/day08b.o $(OBJ)/util.o
