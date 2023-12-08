@@ -8,6 +8,7 @@ module util
     integer, parameter, public :: code_0 = iachar('0')
     integer, parameter, public :: code_9 = iachar('9')
 
+    public :: lcm
     public :: printarray
     public :: printresultline_integer
     public :: printresultline_int64
@@ -21,6 +22,33 @@ module util
     public :: string_extract_integers
 
 contains
+
+    !> find least common multiplier of an array of int64 numbers
+    integer(int64) function lcm(numbers)
+        implicit none
+
+        integer(int64), intent(in) :: numbers(:)
+        integer(int64)             :: largest
+        integer                    :: largestloc, i
+        logical                    :: run
+
+        largestloc = maxloc(numbers, 1)
+        largest = numbers(largestloc)
+
+        lcm = 0
+        run = .true.
+        do while (run)
+            lcm = lcm + largest
+            run = .false.
+            do i = 1, size(numbers)
+                if (i == largestloc) cycle
+                if (modulo(lcm, numbers(i)) /= 0) then
+                    run = .true.
+                    exit
+                end if
+            end do
+        end do
+    end function
 
     !> print an array of integers, supports default integer type as well as integer(int64)
     subroutine printarray(array1, array2)

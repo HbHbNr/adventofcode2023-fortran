@@ -1,11 +1,12 @@
 program day01a_main
-    use util, only : printresultline_integer
+    use iso_fortran_env, only : int64
+    use util, only : printresultline_int64
     use day01a, only : solve
     implicit none
 
-    integer :: result
+    integer(int64) :: result
 
     ! result = solve('inputfiles/day01_example.txt')
     result = solve('inputfiles/day01_input.txt')
-    call printresultline_integer('01a', result)
+    call printresultline_int64('01a', result)
 end program day01a_main

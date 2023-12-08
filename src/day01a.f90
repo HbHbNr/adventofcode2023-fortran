@@ -1,12 +1,11 @@
 !> Solution for https://adventofcode.com/2023/day/1 part a
 module day01a
-    use util, only : readinputfile_asstringarray
+    use iso_fortran_env, only : int64
+    use util, only : readinputfile_asstringarray, code_0, code_9
     implicit none
     private
 
     integer, parameter :: maxlinelength = 60
-    integer, parameter :: code_0 = iachar('0')
-    integer, parameter :: code_9 = iachar('9')
 
     public :: solve
 
@@ -14,8 +13,9 @@ contains
 
     function sumnumbers(lines) result(calibration_value)
         implicit none
+
         character(len=*), intent(in)  :: lines(:)
-        integer                       :: calibration_value
+        integer(int64)                :: calibration_value
         character(len=:), allocatable :: line
         integer                       :: i, j, digit
 
@@ -43,12 +43,12 @@ contains
 
     end function sumnumbers
 
-    integer function solve(filename)
+    integer(int64) function solve(filename)
         implicit none
 
         character(len=*), intent(in)  :: filename
         character(len=:), allocatable :: lines(:)
-        integer                       :: calibration_value
+        integer(int64)                :: calibration_value
 
         lines = readinputfile_asstringarray(filename, maxlinelength)
         calibration_value = sumnumbers(lines)

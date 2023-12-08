@@ -1,4 +1,4 @@
-module day01a_test
+module day07a_test
     use iso_fortran_env, only : int64
     use fruit
     implicit none
@@ -8,23 +8,23 @@ module day01a_test
 contains
 
     subroutine test_solve_example
-        use day01a, only : solve
+        use day07a, only : solve
         implicit none
 
         integer(int64) :: result
 
-        result = solve('../inputfiles/day01_example.txt')
-        call assert_true (142 == result)
+        result = solve('../inputfiles/day07_example.txt')
+        call assert_true (-1 == result)
     end subroutine
 
     subroutine test_solve_input
-        use day01a, only : solve
+        use day07a, only : solve
         implicit none
 
         integer(int64) :: result
 
-        result = solve('../inputfiles/day01_input.txt')
-        call assert_true (53921 == result)
+        result = solve('../inputfiles/day07_input.txt')
+        call assert_true (-1 == result)
     end subroutine
 
-end module day01a_test
+end module day07a_test
