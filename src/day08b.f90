@@ -1,7 +1,7 @@
 !> Solution for https://adventofcode.com/2023/day/8 part b
 module day08b
     use iso_fortran_env, only : int64
-    use util, only : readinputfile_asline, readinputfile_asstringarray
+    use util, only : readinputfile_asline, readinputfile_asstringarray, lcm
     implicit none
     private
 
@@ -14,36 +14,6 @@ module day08b
     public :: solve
 
 contains
-
-    integer(int64) function lcm(numbers)
-        implicit none
-
-        integer(int64), intent(in) :: numbers(:)
-        integer(int64)             :: largest
-        integer                    :: largestloc, i
-        logical                    :: run
-
-        largestloc = maxloc(numbers, 1)
-        largest = numbers(largestloc)
-        print *, 'max:', largestloc, largest
-
-        lcm = 0
-        run = .true.
-        do while (run)
-            lcm = lcm + largest
-            ! print *, 'testing', lcm
-            run = .false.
-            do i = 1, size(numbers)
-                if (i == largestloc) cycle
-                if (modulo(lcm, numbers(i)) /= 0) then
-                    run = .true.
-                    exit
-                end if
-            end do
-            ! print *, lcm
-        end do
-        print *, 'lcm:', lcm
-    end function
 
     function count_steps(firstline, lines) result(steps)
         implicit none
@@ -63,7 +33,6 @@ contains
         do i = 1, len(firstline)
             goleft(i) = firstline(i:i) == 'L'
         end do
-        ! print *, goleft
 
         ! init targets
         allocate(targets(2, zzz))
@@ -96,7 +65,6 @@ contains
                 ! convert node names to numbers
                 currentnode = transfer(line(1:4), 1)
                 startnodes(s) = currentnode
-                print *, 'a start node: ', transfer(currentnode, '    ')
             else if (line(3:3) == 'Z') then
                 e = e + 1
                 ! make node names 4 bytes wide by placing a null character after each triple
@@ -104,10 +72,8 @@ contains
                 ! convert node names to numbers
                 currentnode = transfer(line(1:4), 1)
                 exitnodes(e) = currentnode
-                print *, 'an exit node: ', transfer(currentnode, '    ')
             end if
         end do
-        print *, 'start- and exitnodes: ', startnodecount
 
         ! walk from each start node individually to find the cycles
         allocate(cycles(startnodecount))
@@ -132,7 +98,6 @@ contains
                 ! check if new node is an exit node
                 run = findloc(exitnodes, currentnode, 1) == 0
             end do
-            print *, transfer(currentnode, '    '), ' stopped after steps:', steps
             cycles(i) = steps
         end do
 

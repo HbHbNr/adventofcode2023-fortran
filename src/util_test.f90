@@ -6,6 +6,24 @@ module util_test
 
 contains
 
+    subroutine test_lcm
+        use iso_fortran_env, only : int64
+        use util, only : lcm
+        implicit none
+
+        integer(int64) :: array1(4) = [2, 3, 4, 5]
+        integer(int64) :: lcm1
+        integer(int64) :: array2(3) = [60_int64, 70_int64, 80_int64]
+        integer(int64) :: lcm2
+
+        lcm1 = lcm(array1)
+        call assert_true (60 == lcm1)
+
+        lcm2 = lcm(array2)
+        print *, 'lcm2', lcm2
+        call assert_true (1680 == lcm2)
+    end subroutine
+
     subroutine test_printarray
         use iso_fortran_env, only : int64
         use util, only : printarray

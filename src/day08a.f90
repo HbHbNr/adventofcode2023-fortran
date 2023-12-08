@@ -28,7 +28,6 @@ contains
         do i = 1, len(firstline)
             goleft(i) = firstline(i:i) == 'L'
         end do
-        ! print *, goleft
 
         ! init targets
         allocate(targets(2, zzz))
@@ -50,7 +49,6 @@ contains
         currentchoice = 1
         do while (currentnode /= zzz)
             steps = steps + 1
-            ! print *, steps, transfer(currentnode, '    ')
             if (goleft(currentchoice)) then
                 currentnode = targets(1, currentnode)
             else
