@@ -42,7 +42,8 @@ contains
         class(Hand), intent(in) :: this
         integer, intent(in)     :: rank
 
-        print '(I4, A1, 5A1, 5I3, A, I3, A, I1)', rank, '', this%cards, this%cardtypes, ' / ', this%bid, ' / ', this%handtype
+        print '(I4, A1, 5A1, 5I3, A, I4, A, I1)', rank, '', this%cards, this%cardtypes, ' / ', this%bid, ' / ', this%handtype
+        ! print '(I4, A1, 5A1, A, I4, A, I1)', rank, '', this%cards, ' ', this%bid, ' ', this%handtype
     end subroutine
 
     ! order ascending
@@ -141,7 +142,7 @@ contains
         ! scan all hands to assign a handtype each
         do i = 1, size(lines)
             line = lines(i)
-            read (line, '(5A1, 1X, I3)') hands(i)%cards, hands(i)%bid
+            read (line, '(5A1, 1X, I4)') hands(i)%cards, hands(i)%bid
             frequencies(:) = 0
             do c = 1, cardcount
                 card = hands(i)%cards(c)
@@ -196,8 +197,9 @@ contains
         call merge_sort(hands, 1, size(hands), handstmp)
 
         ! calculate total winnings from bid and rank
+        total_winnings = 0
         do i = 1, size(hands)
-            call hands(i)%print(i)
+            ! call hands(i)%print(i)
             total_winnings = total_winnings + i * hands(i)%bid
         end do
     end function scan_hands
@@ -212,8 +214,7 @@ contains
         lines = readinputfile_asstringarray(filename, maxlinelength)
         total_winnings = scan_hands(lines)
 
-        ! solve = total_winnings
-        solve = -1
+        solve = total_winnings
     end function
 
 end module day07a
