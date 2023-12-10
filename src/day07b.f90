@@ -1,5 +1,5 @@
-!> Solution for https://adventofcode.com/2023/day/7 part a
-module day07a
+!> Solution for https://adventofcode.com/2023/day/7 part b
+module day07b
     use iso_fortran_env, only : int64
     use util, only : readinputfile_asstringarray, code_0, code_9
     implicit none
@@ -7,7 +7,7 @@ module day07a
 
     integer, parameter :: maxlinelength = 10
     integer, parameter :: cardcount = 5
-    integer, parameter :: totalcardtypes = 14  ! but cardtype 1 is never used
+    integer, parameter :: totalcardtypes = 14  ! but cardtype 11 is never used (was J on part a)
 
     type :: Hand
         private
@@ -126,6 +126,74 @@ contains
         end if
     end subroutine
 
+    function find_hand_type(cardtypes) result(handtype)
+        implicit none
+
+        integer, intent(in) :: cardtypes(:)
+        integer             :: handtype
+        integer             :: c, frequencies(1:totalcardtypes), cardtype, first2loc
+
+        frequencies(:) = 0
+        do c = 1, cardcount
+            cardtype = cardtypes(c)
+            frequencies(cardtype) = frequencies(cardtype) + 1
+        end do
+        ! print '(14I2)', frequencies
+        if (findloc(frequencies, 5, 1) > 0) then
+            handtype = 7  ! Five of a kind
+        else if (findloc(frequencies, 4, 1) > 0) then
+            handtype = 6  ! Four of a kind
+        else if (findloc(frequencies, 3, 1) > 0) then
+            if (findloc(frequencies, 2, 1) > 0) then
+                handtype = 5  ! Full House
+            else
+                handtype = 4  ! Three of a kind
+            end if
+        else
+            first2loc = findloc(frequencies, 2, 1)
+            if (first2loc > 0) then
+                frequencies(first2loc) = 0  ! remove first 2 and search again for a second 2
+                if (findloc(frequencies, 2, 1) > 0) then
+                    handtype = 3  ! Two pairs
+                else
+                    handtype = 2  ! One pair
+                end if
+            else
+                handtype = 1  ! High card
+            end if
+        end if
+    end function
+
+    function find_max_hand_type(cardtypes) result(handtype)
+        implicit none
+
+        integer, intent(in)  :: cardtypes(:)
+        integer              :: handtype
+        integer, allocatable :: trycardtypes(:)
+        integer              :: i, tryhandtype
+
+        if (findloc(cardtypes, 1, 1) == 0) then
+            handtype = find_hand_type(cardtypes)
+        else
+            ! at least one Joker needs to be replace
+            ! allocate(trycardtypes(size(cardtypes)))
+            handtype = 1  ! High card as base
+            do i = 2, totalcardtypes
+                if (i == 11) cycle  ! no cardtype 11 anymore
+                ! clone original cardtypes
+                trycardtypes = cardtypes
+                ! replace all Jokers with a different type
+                where (cardtypes == 1) trycardtypes = i
+                tryhandtype = find_hand_type(trycardtypes)
+                if (tryhandtype > handtype) then
+                    ! print *, trycardtypes, ' are better than', cardtypes
+                    ! print *, handtype, ' -->', tryhandtype
+                    handtype = tryhandtype
+                end if
+            end do
+        end if
+    end function
+
     function scan_hands(lines) result(total_winnings)
         implicit none
 
@@ -133,7 +201,7 @@ contains
         integer(int64)                :: total_winnings
         character(len=:), allocatable :: line
         type(Hand), allocatable       :: hands(:), handstmp(:)
-        integer                       :: i, c, frequencies(2:totalcardtypes), cardtype, handtype, first2loc
+        integer                       :: i, c, cardtype, handtype
         character(len=1)              :: card
 
         allocate(hands(size(lines)))
@@ -143,7 +211,6 @@ contains
         do i = 1, size(lines)
             line = lines(i)
             read (line, '(5A1, 1X, I4)') hands(i)%cards, hands(i)%bid
-            frequencies(:) = 0
             do c = 1, cardcount
                 card = hands(i)%cards(c)
                 select case(card)
@@ -154,39 +221,15 @@ contains
                 case ('Q')
                     cardtype = 12
                 case ('J')
-                    cardtype = 11
+                    cardtype = 1
                 case ('T')
                     cardtype = 10
                 case default
                     cardtype = iachar(card) - code_0
                 end select
                 hands(i)%cardtypes(c) = cardtype
-                frequencies(cardtype) = frequencies(cardtype) + 1
             end do
-            ! print '(14I2)', frequencies
-            if (findloc(frequencies, 5, 1) > 0) then
-                handtype = 7  ! Five of a kind
-            else if (findloc(frequencies, 4, 1) > 0) then
-                handtype = 6  ! Four of a kind
-            else if (findloc(frequencies, 3, 1) > 0) then
-                if (findloc(frequencies, 2, 1) > 0) then
-                    handtype = 5  ! Full House
-                else
-                    handtype = 4  ! Three of a kind
-                end if
-            else
-                first2loc = findloc(frequencies, 2, 1)
-                if (first2loc > 0) then
-                    frequencies(first2loc + 1) = 0  ! remove first 2 and search again for a second 2
-                    if (findloc(frequencies, 2, 1) > 0) then
-                        handtype = 3  ! Two pairs
-                    else
-                        handtype = 2  ! One pair
-                    end if
-                else
-                    handtype = 1  ! High card
-                end if
-            end if
+            handtype = find_max_hand_type(hands(i)%cardtypes)
             call hands(i)%init(handtype)
             ! print '(14I2)', frequencies
             ! call hands(i)%print()
@@ -217,4 +260,4 @@ contains
         solve = total_winnings
     end function
 
-end module day07a
+end module day07b

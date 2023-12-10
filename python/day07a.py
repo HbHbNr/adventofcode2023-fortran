@@ -64,7 +64,7 @@ class Hand(NamedTuple):
         return str(handType.value) + cardsstr
 
 
-def main():
+def main() -> None:
     # filename = 'inputfiles/day07_example.txt'
     filename = 'inputfiles/day07_input.txt'
 
@@ -92,6 +92,7 @@ def main():
         total = total + (rank * hand.bid)
 
     printresultline('07a', total)
+
 
 if __name__ == '__main__':
     main()
