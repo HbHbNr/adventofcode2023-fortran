@@ -50,19 +50,19 @@ contains
         walk = .true.
         do while (walk)
             curpipe = lines(curpos(1))(curpos(2):curpos(2))
-            ! print *, curpipe
             do direction = 1, 4
                 nextpos = curpos + offset(:, direction)
                 if (nextpos(1) < 1) cycle
                 if (nextpos(1) > size(lines)) cycle
                 if (nextpos(2) < 1) cycle
                 if (nextpos(2) > len(lines(1))) cycle
+
                 nextpipe = lines(nextpos(1))(nextpos(2):nextpos(2))
-                ! print *, 'try: ', nextpipe
                 if (ALL(nextpos == lastpos)) cycle
+
+                ! found the correct connection -> exit loop
                 if (is_connected(curpipe, nextpipe, direction)) exit
             end do
-            ! print *, 'chosen: ', nextpipe
             totalsteps = totalsteps + 1
             lastpos = curpos
             curpos = nextpos
@@ -99,7 +99,6 @@ contains
 
         lines = readinputfile_asstringarray(filename, maxlinelength)
         call find_start(lines, start)
-        ! print *, 'start:', start
         farthest_tile = find_farthest_tile(lines, start)
 
         solve = farthest_tile
