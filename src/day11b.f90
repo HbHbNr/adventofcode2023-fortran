@@ -1,11 +1,12 @@
-!> Solution for https://adventofcode.com/2023/day/11 part a
-module day11a
+!> Solution for https://adventofcode.com/2023/day/11 part b
+module day11b
     use iso_fortran_env, only : int64
     use util, only : readinputfile_asstringarray, code_0, code_9
     implicit none
     private
 
     integer, parameter :: maxlinelength = 140
+    integer, parameter :: expansion_factor = 1000000
 
     public :: solve
 
@@ -41,13 +42,16 @@ contains
 
         logical, intent(in) :: doubles(:)
         integer, intent(in) :: start, end
-        integer             :: length
+        integer(int64)      :: length
         integer             :: step
 
         step = 1
         if (start > end) step = -1
 
-        length = count(doubles(start:end:step), 1)
+        ! the additional steps use one less than the expansion factor, because
+        ! the manhattan distance in the non-expanded space contains the steps
+        ! already once
+        length = count(doubles(start:end:step), 1) * (expansion_factor - 1)
     end function
 
     function sum_shortest_paths(map, double_rows, double_cols, galaxies, galaxypos) result(path_sum)
@@ -57,7 +61,8 @@ contains
         logical, intent(inout)       :: double_rows(:), double_cols(:)
         integer, intent(in)          :: galaxies, galaxypos(:,:)
         integer(int64)               :: path_sum
-        integer                      :: g1, g2, length, pos1(2), pos2(2), distance(2)
+        integer                      :: g1, g2, pos1(2), pos2(2), distance(2)
+        integer(int64)               :: length
 
         path_sum = 0
         do g1 = 1, galaxies - 1
@@ -115,4 +120,4 @@ contains
         solve = path_sum
     end function
 
-end module day11a
+end module day11b
