@@ -52,14 +52,11 @@ contains
             ! if the reflection line is not exactly in the middle, the smaller part
             ! defines how many columns could be matched
             matchable = min(left, width - left)
-            ! print *, 'left:', left, ' matchable:', matchable
             do row = 1, size(map, 1)
                 if (ANY(map(row,left:(left-matchable+1):-1) &
                         .neqv. &
                         map(row,left+1:left+matchable))) cycle leftloop
-                ! print *, map(row,left:(left-matchable+1):-1), '|', map(row,left+1:left+matchable)
             end do
-            ! print *, '******** reflection found, left:', left
             summary = left
             exit
         end do leftloop
@@ -78,14 +75,11 @@ contains
             ! if the reflection line is not exactly in the middle, the smaller part
             ! defines how many columns could be matched
             matchable = min(top, height - top)
-            ! print *, 'top:', top, ' matchable:', matchable
             do col = 1, size(map, 2)
                 if (ANY(map(top:(top-matchable+1):-1,col) &
                         .neqv. &
                         map(top+1:top+matchable,col))) cycle toploop
-                ! print *, map(top:(top-matchable+1):-1,col), '|', map(top+1:top+matchable,col)
             end do
-            ! print *, '******** reflection found, top:', top
             summary = top
             exit
         end do toploop
@@ -96,9 +90,7 @@ contains
 
         character(len=*), intent(in) :: lines(:)
         integer(int64)               :: summary
-        ! integer                      :: i, j, digit
         logical, allocatable         :: map(:,:)
-        logical                      :: vertikal_line_reflection
         integer                      :: reflected_lines
 
         map = create_map(lines)
@@ -133,10 +125,9 @@ contains
                     last = i
                 end if
             end do
-            ! print *, first, last
-            block = lines(first:last)
-
+            
             ! find reflection and add value to summary
+            block = lines(first:last)
             summary = summary + find_reflection(block)
 
             first = last + 2
