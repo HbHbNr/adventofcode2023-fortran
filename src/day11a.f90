@@ -5,7 +5,7 @@ module day11a
     implicit none
     private
 
-    integer, parameter :: maxlinelength = 60
+    integer, parameter :: maxlinelength = 140
 
     public :: solve
 
@@ -28,7 +28,7 @@ contains
                     galaxies = galaxies + 1
                     map(row, col) = galaxies
                     galaxypos(:,galaxies) = [row, col]
-                    print *, galaxies, ':', galaxypos(:,galaxies)
+                    ! print *, galaxies, ':', galaxypos(:,galaxies)
                     double_rows(row) = .false.
                     double_cols(col) = .false.
                 end if
@@ -71,7 +71,7 @@ contains
                 ! add expansion
                 length = length + expansion(double_rows, pos1(1), pos2(1))
                 length = length + expansion(double_cols, pos1(2), pos2(2))
-                print *, g1, g2, length
+                ! print *, g1, g2, length
 
                 ! sum up final length
                 path_sum = path_sum + length
@@ -111,14 +111,14 @@ contains
         galaxies = 0
 
         call enumerate_galaxies(lines, map, double_rows, double_cols, galaxies, galaxypos)
-        call print_map(map)
-        print *, double_rows
-        print *, double_cols
+        ! call print_map(map)
+        ! print *, double_rows
+        ! print *, double_cols
 
         path_sum = sum_shortest_paths(map, double_rows, double_cols, galaxies, galaxypos)
 
-        ! solve = path_sum
-        solve = -1
+        solve = path_sum
+        ! solve = -1
     end function
 
 end module day11a
