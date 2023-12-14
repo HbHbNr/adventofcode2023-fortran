@@ -14,8 +14,7 @@ contains
         integer(int64) :: result
 
         result = solve('../inputfiles/day12_example.txt')
-        ! call assert_true (21 == result)
-        call assert_true (-1 == result)
+        call assert_true (21 == result)
     end subroutine
 
     subroutine test_solve_input
@@ -25,7 +24,7 @@ contains
         integer(int64) :: result
 
         result = solve('../inputfiles/day12_input.txt')
-        call assert_true (-1 == result)  ! 12097 is too high
+        call assert_true (7344 == result)
     end subroutine
 
 end module day12a_test

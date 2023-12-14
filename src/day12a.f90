@@ -62,6 +62,12 @@ contains
             ! print *, 'groupstarts:', groupstarts, ' < groups:', size(group_sizes)
             return
         end if
+        ! repeat check from beginning of a new gap:
+        if (currentgroupsize < group_sizes(groupstarts)) then
+            ! current group is not big enough -> not verified
+            ! print *, 'currentgroupsize:', currentgroupsize, ' < groupsize:', group_sizes(groupstarts)
+            return
+        end if
 
         fits = .true.
     end function
@@ -80,7 +86,7 @@ contains
         if (unknown_count == 0) then
             if (verify_group_sizes(damaged, group_sizes)) then
                 total_arrangements = total_arrangements + 1
-                print *, id, ' verified: ', damaged, ':', group_sizes
+                ! print *, id, ' verified: ', damaged, ':', group_sizes
             end if
             return
         end if
@@ -135,8 +141,8 @@ contains
             ! if (row == 1) exit
         end do
 
-        ! solve = total_arrangements
-        solve = -1
+        solve = total_arrangements
+        ! solve = -1
     end function
 
 end module day12a
