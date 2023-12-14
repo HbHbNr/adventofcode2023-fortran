@@ -24,7 +24,7 @@ contains
         integer(int64) :: result
 
         result = solve('../inputfiles/day14_input.txt')
-        call assert_true (-1 == result)
+        call assert_true (108840 == result)
     end subroutine
 
 end module day14a_test
