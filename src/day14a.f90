@@ -20,8 +20,8 @@ contains
         implicit none
 
         integer, intent(inout) :: map(:,:)
-        integer(int64)                :: total_load
-        integer                       :: height, row, col, newrow, testrow
+        integer(int64)         :: total_load
+        integer                :: height, row, col, newrow, testrow
 
         total_load = 0
         height = size(map, 1)
@@ -30,7 +30,6 @@ contains
                 if (map(row, col) == empty_space) cycle
                 if (map(row, col) == rock_cube) cycle
                 ! round cube on this place
-                ! print '(I4,A,I4)', row, '/', col
                 if (row == 1) then
                     ! already max north
                     total_load = total_load + height
@@ -39,7 +38,6 @@ contains
                 ! not max north, so try to roll it
                 newrow = row
                 do testrow = row - 1, 1, -1
-                    ! print '(A,I4,A,I4,A,I1)', '---------- ', testrow, '/', col, '=', map(testrow, col)
                     if (map(testrow, col) == empty_space) then
                         newrow = testrow
                     else
@@ -48,7 +46,6 @@ contains
                 end do
                 if (newrow /= row) then
                     ! move rock to new position
-                    ! print '(A,I4,A,I4,A,I4,A,I4)', 'move', row, '/', col, ' to ', newrow, '/', col
                     map(row, col) = empty_space
                     map(newrow, col) = rock_round
                 end if
@@ -82,8 +79,8 @@ contains
     subroutine print_map(map)
         implicit none
 
-        integer, intent(in) :: map(:,:)
-        integer             :: row
+        integer, intent(in)           :: map(:,:)
+        integer                       :: row
         character(len=:), allocatable :: mapoutput
 
         if (size(map, 2) == 10) then
@@ -108,11 +105,7 @@ contains
         
         lines = readinputfile_asstringarray(filename, maxlinelength)
         map = create_map(lines)
-        ! call print_map(map)
-        ! print *
-
         total_load = roll_rocks(map)
-        ! call print_map(map)
 
         solve = total_load
     end function
