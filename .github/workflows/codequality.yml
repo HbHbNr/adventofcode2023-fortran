@@ -14,7 +14,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Make and run all binaries
       run: |
-        make DEBUG= runall
+        make DEBUG= runall_qc
 
   runtests:
     needs: runall
@@ -32,4 +32,4 @@ jobs:
         make DEBUG= tests
     - name: Run FRUITpy tests
       run: |
-        ./fruitpy.sh
+        ./fruitpy.sh QC
