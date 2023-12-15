@@ -40,8 +40,7 @@ contains
             end do
             calibration_value = calibration_value + digit
         end do
-
-    end function sumnumbers
+    end function
 
     integer(int64) function solve(filename)
         implicit none
