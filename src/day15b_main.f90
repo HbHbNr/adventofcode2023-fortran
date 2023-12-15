@@ -6,7 +6,7 @@ program day15b_main
 
     integer(int64) :: result
 
-    result = solve('inputfiles/day15_example.txt')
-    ! result = solve('inputfiles/day15_input.txt')
+    ! result = solve('inputfiles/day15_example.txt')
+    result = solve('inputfiles/day15_input.txt')
     call printresultline_int64('15b', result)
 end program day15b_main

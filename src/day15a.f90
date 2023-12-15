@@ -35,7 +35,7 @@ contains
             hash = modulo(hash, 256)
         end do
         if (hash > 0) then
-            !also for the last character:
+            ! also for the last character:
             total_sum = total_sum + hash
         end if
 
