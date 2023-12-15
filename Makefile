@@ -25,6 +25,9 @@ all: $(BINARIES)
 runall: $(BINARIES)
 	for BINARY in $(BINARIES); do $${BINARY}; done
 
+runall_qc: $(BINARIES)
+	for BINARY in $(filter-out $(BIN)/day05b,$(BINARIES)); do $${BINARY}; done
+
 runbenchmark: $(BINARIES)
 	for BINARY in $(BINARIES); do /usr/bin/time -f "$${BINARY}: %es" $${BINARY} > /dev/null; done
 
