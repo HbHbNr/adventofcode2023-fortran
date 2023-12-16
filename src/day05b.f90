@@ -16,24 +16,24 @@ module day05b
 
 contains
 
-    function lookup(mapping, oldvalue) result(nextvalue)
+    function reverse_lookup(mapping, nextvalue) result(oldvalue)
         implicit none
 
         integer, intent(in)          :: mapping
-        integer(int64), intent(in)   :: oldvalue
-        integer(int64)               :: nextvalue
+        integer(int64), intent(in)   :: nextvalue
+        integer(int64)               :: oldvalue
         integer                      :: i, from, to
 
         from = mapindexes(mapping, 1)
         to = mapindexes(mapping, 2)
 
-        ! if not mapping is found, keep the old value
-        nextvalue = oldvalue
+        ! if not mapping is found, keep the next value
+        oldvalue = nextvalue
         iloop: do i = from, to
             ! print *, map(i, 1), map(i, 2), map(i, 3)
-            if (oldvalue >= map(i, 2)) then
-                if (oldvalue <= map(i, 2) + map(i, 3) - 1) then
-                    nextvalue = oldvalue - map(i, 2) + map(i, 1)
+            if (nextvalue >= map(i, 1)) then
+                if (nextvalue <= map(i, 1) + map(i, 3) - 1) then
+                    oldvalue = nextvalue - map(i, 1) + map(i, 2)
                     exit iloop
                 end if
             end if
@@ -93,19 +93,23 @@ contains
         end do
         mapindexes(total_mappings, 2) = size(map, 1)
 
-        lowest_location_number = huge(map)
-        do seedrangestart = 1, size(seeds), 2
-            do seed = seeds(seedrangestart), seeds(seedrangestart) + seeds(seedrangestart+1) - 1
-                oldvalue = seed
+        ! solve from location to seed with reverse lookup
+        llnloop: do lowest_location_number = 0, huge(map) - 1
 
-                do mapping = 1, total_mappings
-                    nextvalue = lookup(mapping, oldvalue)
-                    oldvalue = nextvalue
-                end do
-
-                lowest_location_number = min(lowest_location_number, nextvalue)
+            nextvalue = lowest_location_number
+            do mapping = total_mappings, 1, -1
+                oldvalue = reverse_lookup(mapping, nextvalue)
+                nextvalue = oldvalue
             end do
-        end do
+
+            do seedrangestart = 1, size(seeds), 2
+                if (oldvalue >= seeds(seedrangestart)) then
+                    if (oldvalue <= seeds(seedrangestart) + seeds(seedrangestart+1) - 1) then
+                        exit llnloop
+                    end if
+                end if
+            end do
+        end do llnloop
     end function scan_alamanac
 
     integer(int64) function solve(filename)
