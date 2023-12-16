@@ -1,5 +1,5 @@
-!> Solution for https://adventofcode.com/2023/day/16 part a
-module day16a
+!> Solution for https://adventofcode.com/2023/day/16 part b
+module day16b
     use iso_fortran_env, only : int64
     use util, only : readinputfile_asstringarray, code_0, code_9
     implicit none
@@ -172,19 +172,41 @@ contains
 
         character(len=*), intent(in)  :: filename
         character(len=:), allocatable :: lines(:)
-        integer(int64)                :: energized_tiles_count
+        integer(int64)                :: max_energized_tiles_count
         character(len=1), allocatable :: map(:,:)
         integer, allocatable          :: visitmap(:,:)
+        integer(int64)                :: energized_tiles_count
+        integer                       :: i
         
         lines = readinputfile_asstringarray(filename, maxlinelength)
         map = create_map(lines)
         allocate(visitmap(size(map, 1),size(map, 2)))
-        visitmap = 0
 
-        energized_tiles_count = 0
-        call travel_beam(map, visitmap, energized_tiles_count, [1, 1], right)
+        max_energized_tiles_count = 0
+        ! horizontal start
+        do i = 1, size(map, 1)
+            visitmap = 0
+            energized_tiles_count = 0
+            call travel_beam(map, visitmap, energized_tiles_count, [i, 1], right)
+            max_energized_tiles_count = max(max_energized_tiles_count, energized_tiles_count)
+            visitmap = 0
+            energized_tiles_count = 0
+            call travel_beam(map, visitmap, energized_tiles_count, [i, size(map, 1)], left)
+            max_energized_tiles_count = max(max_energized_tiles_count, energized_tiles_count)
+        end do
+        ! vertical start
+        do i = 1, size(map, 2)
+            visitmap = 0
+            energized_tiles_count = 0
+            call travel_beam(map, visitmap, energized_tiles_count, [1, i], down)
+            max_energized_tiles_count = max(max_energized_tiles_count, energized_tiles_count)
+            visitmap = 0
+            energized_tiles_count = 0
+            call travel_beam(map, visitmap, energized_tiles_count, [size(map, 1), i], top)
+            max_energized_tiles_count = max(max_energized_tiles_count, energized_tiles_count)
+        end do
 
-        solve = energized_tiles_count
+        solve = max_energized_tiles_count
     end function
 
-end module day16a
+end module day16b
