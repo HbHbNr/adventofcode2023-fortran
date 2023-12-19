@@ -12,36 +12,36 @@ module day18a
     integer, parameter :: down = 4
     ! offset is first row, second column
     integer, parameter :: offset(2, 4) = reshape([0, 1, -1, 0, 0, -1, 1, 0], [2, 4])
-    character(len=*), parameter :: visitnarrowmapoutput = '(7L1)'
-    character(len=*), parameter :: visitwidemapoutput = '(281L1)'
+    character(len=*), parameter :: narrowvisitmapoutput = '(7L1)'
+    character(len=*), parameter :: widevisitmapoutput = '(281L1)'
 
     public :: solve
 
 contains
 
-    function find_loop_orientation(steps, visited, start) result(counter_clockwise_loop)
+    function find_loop_orientation(steps, visitedmap, start) result(counter_clockwise_loop)
         implicit none
 
-        integer, intent(in)          :: steps(:,:)
-        logical, intent(inout)       :: visited(:,:)
-        integer, intent(in)          :: start(2)
-        logical                      :: counter_clockwise_loop
-        integer                      :: curpos(2)
-        integer                      :: i, j, distance
-        integer                      :: direction, lastdirection, directionchange
-        integer                      :: counter_clockwise_turns_delta
+        integer, intent(in)    :: steps(:,:)
+        logical, intent(inout) :: visitedmap(:,:)
+        integer, intent(in)    :: start(2)
+        logical                :: counter_clockwise_loop
+        integer                :: curpos(2)
+        integer                :: i, j, distance
+        integer                :: direction, lastdirection, directionchange
+        integer                :: counter_clockwise_turns_delta
 
         curpos = start
         lastdirection = 0
         counter_clockwise_turns_delta = 0
-        visited = .false.
-        visited(curpos(1), curpos(2)) = .true.
+        visitedmap = .false.
+        visitedmap(curpos(1), curpos(2)) = .true.
         do i = 1, size(steps, 2)
             direction = steps(1, i)
             distance = steps(2, i)
             do j = 1, distance
                 curpos = curpos + offset(:, direction)
-                visited(curpos(1), curpos(2)) = .true.
+                visitedmap(curpos(1), curpos(2)) = .true.
             end do
             if (direction /= lastdirection) then
                 if (lastdirection /= 0) then
@@ -64,200 +64,109 @@ contains
         counter_clockwise_loop = counter_clockwise_turns_delta > 0
     end function
 
-    ! function get_paintable(lines, visited, pos) result(pospaintable)
-    !     implicit none
+    function is_diggable(visitedmap, pos) result(posdiggable)
+        implicit none
 
-    !     character(len=*), intent(in) :: lines(:)
-    !     logical, intent(in)          :: visited(:,:)
-    !     integer, intent(in)          :: pos(2)
-    !     logical                      :: pospaintable
+        logical, intent(in) :: visitedmap(:,:)
+        integer, intent(in) :: pos(2)
+        logical             :: posdiggable
 
-    !     pospaintable = .false.
+        posdiggable = .false.
 
-    !     ! get pipe only if inside of grid
-    !     if (pos(1) >= 1) then
-    !         if (pos(1) <= size(visited, 1)) then
-    !             if (pos(2) >= 1) then
-    !                 if (pos(2) <= size(visited, 2)) then
-    !                     ! get pipe only if not visited
-    !                     if (.not. visited(pos(1), pos(2))) then
-    !                         ! get pipe only if not yet painted
-    !                         if (lines(pos(1))(pos(2):pos(2)) /= 'I') then
-    !                             pospaintable = .true.
-    !                         end if
-    !                     end if
-    !                 end if
-    !             end if
-    !         end if
-    !     end if
-    ! end function
+        ! get cube only if inside of grid
+        if (pos(1) >= 1) then
+            if (pos(1) <= size(visitedmap, 1)) then
+                if (pos(2) >= 1) then
+                    if (pos(2) <= size(visitedmap, 2)) then
+                        ! get cube only if not visited
+                        if (.not. visitedmap(pos(1), pos(2))) then
+                            ! ! get cube only if not yet painted
+                            posdiggable = .true.
+                        end if
+                    end if
+                end if
+            end if
+        end if
+    end function
 
-    ! recursive subroutine set_pipe_and_flood(lines, visited, pos, pospipe, painted)
-    !     implicit none
+    recursive subroutine dig_cube_and_flood(visitedmap, pos, dug)
+        implicit none
 
-    !     character(len=*), intent(inout) :: lines(:)
-    !     logical, intent(in)             :: visited(:,:)
-    !     integer, intent(in)             :: pos(2)
-    !     character(len=1), intent(in)    :: pospipe
-    !     integer, intent(inout)          :: painted
-    !     integer                         :: direction, nextpos(2)
+        logical, intent(inout) :: visitedmap(:,:)
+        integer, intent(in)    :: pos(2)
+        integer, intent(inout) :: dug
+        integer                :: direction, nextpos(2)
 
-    !     ! paint requested pipe
-    !     lines(pos(1))(pos(2):pos(2)) = pospipe
-    !     painted = painted + 1
+        ! paint requested cube
+        visitedmap(pos(1), pos(2)) = .true.
+        dug = dug + 1
 
-    !     ! start flooding
-    !     do direction = 1, 4
-    !         nextpos = pos + offset(:, direction)
-    !         if (get_paintable(lines, visited, nextpos)) then
-    !             call set_pipe_and_flood(lines, visited, nextpos, pospipe, painted)
-    !         end if
-    !     end do
-    ! end subroutine
+        ! start flooding
+        do direction = 1, 4
+            nextpos = pos + offset(:, direction)
+            if (is_diggable(visitedmap, nextpos)) then
+                call dig_cube_and_flood(visitedmap, nextpos, dug)
+            end if
+        end do
+    end subroutine
 
-    ! function paint_neighbours(lines, visited, curpos, curpipe, direction, counter_clockwise_loop) result(painted)
-    !     implicit none
+    function dig_adjacent_cubes(steps, visitedmap, start, counter_clockwise_loop) result(dug)
+        implicit none
 
-    !     character(len=*), intent(inout) :: lines(:)
-    !     logical, intent(in)             :: visited(:,:)
-    !     integer, intent(in)             :: curpos(2)
-    !     character(len=1), intent(in)    :: curpipe
-    !     integer, intent(in)             :: direction
-    !     logical, intent(in)             :: counter_clockwise_loop
-    !     integer                         :: painted
-    !     integer                         :: neighbouroffset_vert(2), neighbouroffset_hori(2), neighbourpos(2)
-    !     logical                         :: neighbourpaintable
+        integer, intent(in)    :: steps(:,:)
+        logical, intent(inout) :: visitedmap(:,:)
+        integer, intent(in)    :: start(2)
+        logical, intent(in)    :: counter_clockwise_loop
+        integer                :: dug
+        integer                :: curpos(2), neighbourpos(2)
+        integer                :: i, j, distance
+        integer                :: direction, neighbourdirection
 
-    !     painted = 0
-    !     neighbouroffset_vert = 0
-    !     neighbouroffset_hori = 0
+        curpos = start
+        dug = 0
+        visitedmap(curpos(1), curpos(2)) = .true.
+        do i = 1, size(steps, 2)
+            direction = steps(1, i)
+            distance = steps(2, i)
+            if (counter_clockwise_loop) then
+                neighbourdirection = direction + 1
+            else
+                neighbourdirection = direction -1
+            end if
+            ! fix neighbour direction from down to right
+            if (neighbourdirection == 5) neighbourdirection = 1
+            ! fix neighbour direction from right to down
+            if (neighbourdirection == 0) neighbourdirection = 4
+            ! first dig directly next to the current position
+            neighbourpos = curpos + offset(:, neighbourdirection)
+            if (is_diggable(visitedmap, neighbourpos)) then
+                ! visited(neighbourpos(1), neighbourpos(2)) = .true.
+                ! dug = dug + 1
+                call dig_cube_and_flood(visitedmap, neighbourpos, dug)
+            end if
+            ! then dig along the way
+            do j = 1, distance
+                curpos = curpos + offset(:, direction)
+                dug = dug + 1
+                neighbourpos = curpos + offset(:, neighbourdirection)
+                if (is_diggable(visitedmap, neighbourpos)) then
+                    ! visited(neighbourpos(1), neighbourpos(2)) = .true.
+                    ! dug = dug + 1
+                    call dig_cube_and_flood(visitedmap, neighbourpos, dug)
+                end if
+            end do
+        end do
+    end function
 
-    !     ! depending on the type of pipe, vertical neighbours or horizontal neighbours or both could be painted,
-    !     ! but only if also direction and loop orientation fit
-
-    !     if (curpipe == '-') then
-    !         ! default: direction right and counter clockwise loop
-    !         neighbouroffset_vert = [-1, 0]
-    !         ! flip once or twice if not default:
-    !         if (.not. counter_clockwise_loop) neighbouroffset_vert = neighbouroffset_vert * (-1)
-    !         if (.not. direction == right) neighbouroffset_vert = neighbouroffset_vert * (-1)
-
-    !     else if (curpipe == '|') then
-    !         ! default: direction top and counter clockwise loop
-    !         neighbouroffset_hori = [0, -1]
-    !         ! flip once or twice if not default:
-    !         if (.not. counter_clockwise_loop) neighbouroffset_hori = neighbouroffset_hori * (-1)
-    !         if (.not. direction == top) neighbouroffset_hori = neighbouroffset_hori * (-1)
-
-    !     else if (curpipe == 'F') then
-    !         if ((direction == left .and. (counter_clockwise_loop .eqv. .false.)) &
-    !             .or. &
-    !             (direction == top  .and. (counter_clockwise_loop .eqv. .true.))) then
-    !             neighbouroffset_vert = [-1, 0]
-    !             neighbouroffset_hori = [0, -1]
-    !         end if
-
-    !     else if (curpipe == '7') then
-    !         if ((direction == right .and. (counter_clockwise_loop .eqv. .true.)) &
-    !             .or. &
-    !             (direction == top   .and. (counter_clockwise_loop .eqv. .false.))) then
-    !             neighbouroffset_vert = [-1, 0]
-    !             neighbouroffset_hori = [0, 1]
-    !         end if
-
-    !     else if (curpipe == 'J') then
-    !         if ((direction == right .and. (counter_clockwise_loop .eqv. .false.)) &
-    !             .or. &
-    !             (direction == down  .and. (counter_clockwise_loop .eqv. .true.))) then
-    !             neighbouroffset_vert = [1, 0]
-    !             neighbouroffset_hori = [0, 1]
-    !         end if
-
-    !     else if (curpipe == 'L') then
-    !         if ((direction == left .and. (counter_clockwise_loop .eqv. .true.)) &
-    !             .or. &
-    !             (direction == down .and. (counter_clockwise_loop .eqv. .false.))) then
-    !             neighbouroffset_vert = [1, 0]
-    !             neighbouroffset_hori = [0, -1]
-    !         end if
-    !     end  if
-
-    !     ! check if a potential vertical neighbour should be set
-    !     if (ANY(neighbouroffset_vert /= 0)) then
-    !         neighbourpos = curpos + neighbouroffset_vert
-    !         neighbourpaintable = get_paintable(lines, visited, neighbourpos)
-    !         if (neighbourpaintable) then
-    !             ! neighbour is free and not yet visited, so it should be the start point of flooding
-    !             call set_pipe_and_flood(lines, visited, neighbourpos, 'I', painted)
-    !         end if
-    !     end if
-
-    !     ! check if a potential horizontal neighbour should be set
-    !     if (ANY(neighbouroffset_hori /= 0)) then
-    !         neighbourpos = curpos + neighbouroffset_hori
-    !         neighbourpaintable = get_paintable(lines, visited, neighbourpos)
-    !         if (neighbourpaintable) then
-    !             ! neighbour is free and not yet visited, so it should be the start point of flooding
-    !             call set_pipe_and_flood(lines, visited, neighbourpos, 'I', painted)
-    !         end if
-    !     end if
-    ! end function
-
-    ! function paint_adjacent_pipes(lines, visited, start, counter_clockwise_loop) result(painted)
-    !     implicit none
-
-    !     character(len=*), intent(inout) :: lines(:)
-    !     logical, intent(in)             :: visited(:,:)
-    !     integer, intent(inout)          :: start(2)
-    !     logical, intent(in)             :: counter_clockwise_loop
-    !     integer                         :: painted
-    !     integer                         :: lastpos(2), curpos(2), nextpos(2)
-    !     integer                         :: direction
-    !     character(len=1)                :: curpipe, nextpipe
-    !     logical                         :: walk
-
-    !     lastpos = start
-    !     curpos = start
-    !     painted = 0        
-    !     walk = .true.
-    !     do while (walk)
-    !         curpipe = lines(curpos(1))(curpos(2):curpos(2))
-    !         ! new: paint corresponding neighbours
-    !         if (curpipe /= 'S') then
-    !             painted = painted + paint_neighbours(lines, visited, curpos, curpipe, direction, counter_clockwise_loop)
-    !         end if
-
-    !         do direction = 1, 4
-    !             nextpos = curpos + offset(:, direction)
-    !             if (nextpos(1) < 1) cycle
-    !             if (nextpos(1) > size(lines)) cycle
-    !             if (nextpos(2) < 1) cycle
-    !             if (nextpos(2) > len(lines(1))) cycle
-
-    !             nextpipe = lines(nextpos(1))(nextpos(2):nextpos(2))
-    !             if (ALL(nextpos == lastpos)) cycle
-
-    !             ! found the correct connection -> exit loop
-    !             if (is_connected(curpipe, nextpipe, direction)) exit
-    !         end do
-
-    !         lastpos = curpos
-    !         curpos = nextpos
-    !         ! stop when reaching start again
-    !         walk = .not. ALL(curpos == start)
-    !     end do
-    ! end function
-
-    function create_map(lines, start, steps) result(map)
+    function create_map(lines, start, steps) result(visitedmap)
         implicit none
 
         character(len=*), intent(in)  :: lines(:)
         integer, intent(inout)        :: start(2)
         integer, intent(out)          :: steps(:,:)
-        logical, allocatable          :: map(:,:)
+        logical, allocatable          :: visitedmap(:,:)
         integer                       :: i, direction, distance
         integer                       :: sumhori, sumvert, minhori, minvert, maxhori, maxvert
-        ! row, col
 
         sumhori = 0
         sumvert = 0
@@ -292,12 +201,12 @@ contains
             steps(:, i) = [direction, distance]
             ! print *, direction, distance
         end do
-        print *, minvert, maxvert, minhori, maxhori
-        print *, maxvert - minvert + 1, maxhori - minhori + 1
+        ! print *, minvert, maxvert, minhori, maxhori
+        ! print *, maxvert - minvert + 1, maxhori - minhori + 1
 
         start = [1 - minvert, 1 - minhori]
-        print *, start
-        allocate(map(maxvert - minvert + 1, maxhori - minhori + 1))
+        ! print *, start
+        allocate(visitedmap(maxvert - minvert + 1, maxhori - minhori + 1))
     end function
 
     subroutine print_lines(lines)
@@ -319,9 +228,9 @@ contains
         character(len=:), allocatable :: visitmapoutput
 
         if (size(visitmap, 2) == 7) then
-            visitmapoutput = visitnarrowmapoutput
+            visitmapoutput = narrowvisitmapoutput
         else
-            visitmapoutput = visitwidemapoutput
+            visitmapoutput = widevisitmapoutput
         end if
 
         do row = 1, size(visitmap, 1)
@@ -335,29 +244,28 @@ contains
         character(len=*), intent(in)  :: filename
         character(len=:), allocatable :: lines(:)
         logical                       :: counter_clockwise_loop
-        integer                       :: start(2), painted
-        logical, allocatable          :: visited(:,:)
+        integer                       :: start(2), dug
+        logical, allocatable          :: visitedmap(:,:)
         integer, allocatable          :: steps(:,:)
-        ! integer                       :: i, j, row, col
 
         lines = readinputfile_asstringarray(filename, maxlinelength)
         allocate(steps(2, size(lines)))
         ! search start position
-        visited = create_map(lines, start, steps)
+        visitedmap = create_map(lines, start, steps)
         ! print '(I3, I3)', steps
 
         ! walk path for the first time, find the orientation of the loop (counter-clockwise or clockwise),
         ! and mark all visited cubes in the "visited" map
-        counter_clockwise_loop = find_loop_orientation(steps, visited, start)
-        call print_visitmap(visited)
-        print *, 'counter_clockwise_loop:', counter_clockwise_loop
+        counter_clockwise_loop = find_loop_orientation(steps, visitedmap, start)
+        ! call print_visitmap(visitedmap)
 
-        ! ! walk again and paint (and count) adjacent neighbours if they are on the correct side: left side if
-        ! ! counter-clockwise loop, right side if clockwise loop
-        ! painted = paint_adjacent_pipes(lines, visited, start, counter_clockwise_loop)
+        ! walk again and dig (and count) adjacent neighbours if they are on the correct side: left side if
+        ! counter-clockwise loop, right side if clockwise loop
+        dug = dig_adjacent_cubes(steps, visitedmap, start, counter_clockwise_loop)
+        ! call print_visitmap(visitedmap)
 
-        ! solve = painted
-        solve = -1
+        solve = dug
+        ! solve = -1
     end function
 
 end module day18a
