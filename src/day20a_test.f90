@@ -42,7 +42,7 @@ contains
         integer(int64) :: result
 
         result = solve('../inputfiles/day20_example1.txt')
-        call assert_true (-1 == result)
+        call assert_true (32000000_int64 == result)
     end subroutine
 
     subroutine test_solve_example2
@@ -52,7 +52,7 @@ contains
         integer(int64) :: result
 
         result = solve('../inputfiles/day20_example2.txt')
-        call assert_true (-1 == result)
+        call assert_true (11687500_int64 == result)
     end subroutine
 
     subroutine test_solve_input
@@ -62,7 +62,7 @@ contains
         integer(int64) :: result
 
         result = solve('../inputfiles/day20_input.txt')
-        call assert_true (-1 == result)
+        call assert_true (886701120_int64 == result)
     end subroutine
 
 end module day20a_test

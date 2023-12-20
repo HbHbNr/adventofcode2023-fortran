@@ -174,7 +174,7 @@ contains
         type(IntRingBuffer)  :: pulselist
         integer              :: sender_module_id, pulse_type_in, receiver_module_id, &
                                 receiver_module_type, pulse_type_out
-        integer              :: i
+        integer              :: i, runs
         logical              :: flipflop_on, conjuction_all_memories_high
 
         ! flipflops_on list the states of all flipflops
@@ -188,87 +188,91 @@ contains
         ! sender_module_id, pulse_type_in, receiver_module_id
         call pulselist%init(3 * max_pulses_buffered)
 
-        ! init pulse list with the first button press
-        call pulselist%addLast(name_to_id('bu'))  ! module name "bu" for button is unique
-        call pulselist%addLast(pulsetype_low)
-        call pulselist%addLast(name_to_id('br'))
-        do while(.not. pulselist%empty())
-            ! call pulselist%print()
+        runs = 1000
+        do while(runs > 0)
+            ! init pulse list with the first button press
+            call pulselist%addLast(name_to_id('bu'))  ! module name "bu" for button is unique
+            call pulselist%addLast(pulsetype_low)
+            call pulselist%addLast(name_to_id('br'))
+            do while(.not. pulselist%empty())
+                ! call pulselist%print()
 
-            ! get triplet from pulse list
-            sender_module_id = pulselist%removeFirst()
-            pulse_type_in = pulselist%removeFirst()
-            receiver_module_id = pulselist%removeFirst()
-            print *, id_to_name(sender_module_id), &
-                     ' -', pulsetype_name(pulse_type_in), '-> ', &
-                     id_to_name(receiver_module_id)
+                ! get triplet from pulse list
+                sender_module_id = pulselist%removeFirst()
+                pulse_type_in = pulselist%removeFirst()
+                receiver_module_id = pulselist%removeFirst()
+                ! print *, id_to_name(sender_module_id), &
+                !         ' -', pulsetype_name(pulse_type_in), '-> ', &
+                !         id_to_name(receiver_module_id)
 
-            ! count number of pulse types for final result
-            if (pulse_type_in == pulsetype_high) then
-                high_pulses = high_pulses + 1
-            else
-                low_pulses = low_pulses + 1
-            end if
+                ! count number of pulse types for final result
+                if (pulse_type_in == pulsetype_high) then
+                    high_pulses = high_pulses + 1
+                else
+                    low_pulses = low_pulses + 1
+                end if
 
-            receiver_module_type = modules(2, receiver_module_id)
-            select case(receiver_module_type)
-            case (modtype_broadcaster)
-                ! forward the same pulse type to all outputs
-                pulse_type_out = pulse_type_in
-                do i = 1, modules(modinfo_number_of_outputs, receiver_module_id)
-                    call pulselist%addLast(receiver_module_id)
-                    call pulselist%addLast(pulse_type_out)
-                    call pulselist%addLast(outputs(i, receiver_module_id))
-                end do
-            case (modtype_flipflop)
-                ! only act if pulse is low
-                if (pulse_type_in == pulsetype_low) then
-                    flipflop_on = flipflops_on(receiver_module_id)
-                    if (.not. flipflop_on) then
-                        flipflops_on(receiver_module_id) = .true.
-                        pulse_type_out = pulsetype_high
-                    else
-                        flipflops_on(receiver_module_id) = .false.
+                receiver_module_type = modules(2, receiver_module_id)
+                select case(receiver_module_type)
+                case (modtype_broadcaster)
+                    ! forward the same pulse type to all outputs
+                    pulse_type_out = pulse_type_in
+                    do i = 1, modules(modinfo_number_of_outputs, receiver_module_id)
+                        call pulselist%addLast(receiver_module_id)
+                        call pulselist%addLast(pulse_type_out)
+                        call pulselist%addLast(outputs(i, receiver_module_id))
+                    end do
+                case (modtype_flipflop)
+                    ! only act if pulse is low
+                    if (pulse_type_in == pulsetype_low) then
+                        flipflop_on = flipflops_on(receiver_module_id)
+                        if (.not. flipflop_on) then
+                            flipflops_on(receiver_module_id) = .true.
+                            pulse_type_out = pulsetype_high
+                        else
+                            flipflops_on(receiver_module_id) = .false.
+                            pulse_type_out = pulsetype_low
+                        end if
+                        do i = 1, modules(modinfo_number_of_outputs, receiver_module_id)
+                            call pulselist%addLast(receiver_module_id)
+                            call pulselist%addLast(pulse_type_out)
+                            call pulselist%addLast(outputs(i, receiver_module_id))
+                        end do
+                    end if
+                case (modtype_conjunction)
+                    ! first find the correct input memory
+                    do i = 1, modules(modinfo_number_of_inputs, receiver_module_id)
+                        if (inputs(i, receiver_module_id) == sender_module_id) then
+                            ! print *, id_to_name(sender_module_id), ' is input', i
+                            exit
+                        end if
+                    end do
+                    ! update the memory for that input
+                    conjunctions_high(i, receiver_module_id) = (pulse_type_in == pulsetype_high)
+                    ! check if all memories are high
+                    conjuction_all_memories_high = .true.
+                    do i = 1, modules(modinfo_number_of_inputs, receiver_module_id)
+                        if (conjunctions_high(i, receiver_module_id) .eqv. .false.) then
+                            conjuction_all_memories_high = .false.
+                            exit
+                        end if
+                    end do
+                    if (conjuction_all_memories_high) then
                         pulse_type_out = pulsetype_low
+                    else
+                        pulse_type_out = pulsetype_high
                     end if
                     do i = 1, modules(modinfo_number_of_outputs, receiver_module_id)
                         call pulselist%addLast(receiver_module_id)
                         call pulselist%addLast(pulse_type_out)
                         call pulselist%addLast(outputs(i, receiver_module_id))
                     end do
-                end if
-            case (modtype_conjunction)
-                ! first find the correct input memory
-                do i = 1, modules(modinfo_number_of_inputs, receiver_module_id)
-                    if (inputs(i, receiver_module_id) == sender_module_id) then
-                        ! print *, id_to_name(sender_module_id), ' is input', i
-                        exit
-                    end if
-                end do
-                ! update the memory for that input
-                conjunctions_high(i, receiver_module_id) = (pulse_type_in == pulsetype_high)
-                ! check if all memories are high
-                conjuction_all_memories_high = .true.
-                do i = 1, modules(modinfo_number_of_inputs, receiver_module_id)
-                    if (conjunctions_high(i, receiver_module_id) .eqv. .false.) then
-                        conjuction_all_memories_high = .false.
-                        exit
-                    end if
-                end do
-                if (conjuction_all_memories_high) then
-                    pulse_type_out = pulsetype_low
-                else
-                    pulse_type_out = pulsetype_high
-                end if
-                do i = 1, modules(modinfo_number_of_outputs, receiver_module_id)
-                    call pulselist%addLast(receiver_module_id)
-                    call pulselist%addLast(pulse_type_out)
-                    call pulselist%addLast(outputs(i, receiver_module_id))
-                end do
-        end select
-        end do
-        print *, 'low_pulses:', low_pulses
-        print *, 'high_pulses:', high_pulses
+                end select
+            end do  ! do while(.not. pulselist%empty())
+            runs = runs - 1
+        end do  ! do while(runs > 0)
+        ! print *, 'low_pulses:', low_pulses
+        ! print *, 'high_pulses:', high_pulses
         total_pulses = low_pulses * high_pulses
     end function
 
