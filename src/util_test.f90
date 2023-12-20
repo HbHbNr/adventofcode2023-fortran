@@ -6,6 +6,18 @@ module util_test
 
 contains
 
+    subroutine test_gausss_area_formular
+        use iso_fortran_env, only : int64
+        use util, only : gausss_area_formular
+        implicit none
+
+        integer        :: array1(2, 3) = reshape([1, 1, 1, 3, 6, 3], [2, 3])
+        integer(int64) :: area
+
+        area = gausss_area_formular(array1)
+        call assert_true (5 == area)
+    end subroutine
+
     subroutine test_lcm
         use iso_fortran_env, only : int64
         use util, only : lcm
@@ -20,7 +32,6 @@ contains
         call assert_true (60 == lcm1)
 
         lcm2 = lcm(array2)
-        print *, 'lcm2', lcm2
         call assert_true (1680 == lcm2)
     end subroutine
 

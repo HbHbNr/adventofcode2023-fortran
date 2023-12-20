@@ -8,6 +8,7 @@ module util
     integer, parameter, public :: code_0 = iachar('0')
     integer, parameter, public :: code_9 = iachar('9')
 
+    public :: gausss_area_formular
     public :: lcm
     public :: printarray
     public :: printresultline_integer
@@ -22,6 +23,32 @@ module util
     public :: string_extract_integers
 
 contains
+
+    ! determine the area of a simple polygon whose vertices are described
+    ! by their Cartesian coordinates in the plane
+    function gausss_area_formular(coords) result(total_area)
+        implicit none
+
+        integer, intent(in) :: coords(:,:)
+            !! Cartesian coordinates of the vertices, dimension 1 is 2, dimension 2 is the number of vertices;
+            !! first part of the coordinate is y, second part of the coordinate is x
+        integer(int64)      :: total_area
+        integer(int64)      :: area
+        integer             :: i, p1(2), p2(2), width, doubleheight
+
+        total_area = 0
+        p1 = coords(:, size(coords, 2))
+        ! the last step leads back to the start
+        do i = 1, size(coords, 2)
+            p2 = coords(:, i)
+            doubleheight = p1(1) + p2(1)
+            width = p1(2) - p2(2)
+            ! divide trapezoid by 2
+            area = 1_int64 * doubleheight * width / 2
+            total_area = total_area + area
+            p1 = p2
+        end do
+    end function
 
     !> find least common multiplier of an array of int64 numbers
     integer(int64) function lcm(numbers)
