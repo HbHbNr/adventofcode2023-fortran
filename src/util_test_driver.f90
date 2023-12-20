@@ -13,6 +13,7 @@ program tests
 
   call init_fruit
 
+  call run_test_case(test_gausss_area_formular,"test_gausss_area_formular")
   call run_test_case(test_lcm,"test_lcm")
   call run_test_case(test_printarray,"test_printarray")
   call run_test_case(test_printresultline_integer,"test_printresultline_integer")
