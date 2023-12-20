@@ -7,6 +7,10 @@ module util
 
     integer, parameter, public :: code_0 = iachar('0')
     integer, parameter, public :: code_9 = iachar('9')
+    integer, parameter, public :: code_upper_a = iachar('A')
+    integer, parameter, public :: code_upper_z = iachar('Z')
+    integer, parameter, public :: code_lower_a = iachar('a')
+    integer, parameter, public :: code_lower_z = iachar('z')
 
     public :: gausss_area_formular
     public :: lcm
