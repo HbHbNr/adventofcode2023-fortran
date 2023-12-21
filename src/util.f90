@@ -7,6 +7,10 @@ module util
 
     integer, parameter, public :: code_0 = iachar('0')
     integer, parameter, public :: code_9 = iachar('9')
+    integer, parameter, public :: code_upper_a = iachar('A')
+    integer, parameter, public :: code_upper_z = iachar('Z')
+    integer, parameter, public :: code_lower_a = iachar('a')
+    integer, parameter, public :: code_lower_z = iachar('z')
 
     public :: gausss_area_formular
     public :: lcm
@@ -51,29 +55,56 @@ contains
     end function
 
     !> find least common multiplier of an array of int64 numbers
-    integer(int64) function lcm(numbers)
+    integer(int64) function lcm(orgnumbers)
         implicit none
 
-        integer(int64), intent(in) :: numbers(:)
-        integer(int64)             :: largest
-        integer                    :: largestloc, i
-        logical                    :: run
+        integer(int64), intent(in)  :: orgnumbers(:)
+        integer(int64), allocatable :: numbers(:)
+        integer(int64)              :: increment, tmp
+        integer                     :: largestloc, i, remaining, nextremaining
+        logical                     :: run
 
+        ! create copy of the original numbers
+        numbers = orgnumbers
+
+        ! find largest element and use it as increment
         largestloc = maxloc(numbers, 1)
-        largest = numbers(largestloc)
+        increment = numbers(largestloc)
+        ! move largest to the end of the array
+        if (largestloc /= size(numbers)) then
+            tmp = numbers(size(numbers))
+            numbers(size(numbers)) = numbers(largestloc)
+            numbers(largestloc) = tmp
+        end if
+        nextremaining = size(numbers) - 1
 
         lcm = 0
         run = .true.
         do while (run)
-            lcm = lcm + largest
-            run = .false.
-            do i = 1, size(numbers)
-                if (i == largestloc) cycle
-                if (modulo(lcm, numbers(i)) /= 0) then
-                    run = .true.
+            lcm = lcm + increment
+            remaining = nextremaining
+            do i = 1, remaining
+                if (modulo(lcm, numbers(i)) == 0) then
+                    nextremaining = nextremaining - 1
+                    if (nextremaining > 0) then
+                        increment = lcm
+                        ! start from zero to test the same number again, because the numbers
+                        ! could include duplicates
+                        lcm = 0
+                        ! swap current number to the current end
+                        tmp = numbers(remaining)
+                        numbers(remaining) = numbers(i)
+                        numbers(i) = tmp
+                        ! continue to run because there are more numbers
+                        run = .true.
+                    else
+                        ! no more numbers, result calculated
+                        run = .false.
+                    end if
                     exit
                 end if
             end do
+            ! if none divides current lcm: next round
         end do
     end function
 

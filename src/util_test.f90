@@ -23,16 +23,21 @@ contains
         use util, only : lcm
         implicit none
 
-        integer(int64) :: array1(4) = [2, 3, 4, 5]
+        integer(int64) :: array1(5) = [3, 2, 5, 3, 4]
         integer(int64) :: lcm1
         integer(int64) :: array2(3) = [60_int64, 70_int64, 80_int64]
         integer(int64) :: lcm2
+        integer(int64) :: array3(4) = [3847_int64, 4001_int64, 3877_int64, 3823_int64]
+        integer(int64) :: lcm3
 
         lcm1 = lcm(array1)
         call assert_true (60 == lcm1)
 
         lcm2 = lcm(array2)
         call assert_true (1680 == lcm2)
+
+        lcm3 = lcm(array3)
+        call assert_true (228134431501037_int64 == lcm3)
     end subroutine
 
     subroutine test_printarray
