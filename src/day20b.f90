@@ -1,7 +1,7 @@
 !> Solution for https://adventofcode.com/2023/day/20 part b
 module day20b
     use iso_fortran_env, only : int64
-    use util, only : readinputfile_asstringarray, code_0, code_9, code_lower_a
+    use util, only : readinputfile_asstringarray, code_0, code_9, code_lower_a, lcm
     use class_IntRingBuffer, only : IntRingBuffer
     implicit none
     private
@@ -64,20 +64,16 @@ contains
         character(len=:), allocatable :: line
 
         line = orgline
-        ! print *, num_outputs, line
 
         output_names = ''
         remaining_outputs = num_outputs
         do while (remaining_outputs > 1)
-            ! print *, '"', line, '"'
             comma = index(line, ',')
-            ! print *, '"', line(:comma - 1), '"'
             read (line(:comma - 1), '(A)') name
             if(len_trim(name) == 1) then
                 name(2:2) = name(1:1)
                 name(1:1) = ' '
             end if
-            ! print *, 'name: "', name, '"'
             output_names(num_outputs - remaining_outputs + 1) = name
 
             ! cut current name
@@ -85,13 +81,11 @@ contains
             remaining_outputs = remaining_outputs - 1
         end do
         ! at last output name
-        ! print *, '"', line, '"'
         read (line, '(A2)') name
         if(len_trim(name) == 1) then
             name(2:2) = name(1:1)
             name(1:1) = ' '
         end if
-        ! print *, 'name: "', name, '"'
         output_names(num_outputs) = name
     end subroutine
 
@@ -144,7 +138,6 @@ contains
             modules(modinfo_id, id) = id
             modules(modinfo_modtype, id) = modtype
             modules(modinfo_number_of_outputs, id) = num_outputs
-            ! print *, modules(:, id)
             do j = 1, num_outputs
                 ! store output in sending module
                 output_id = name_to_id(output_names(j))
@@ -160,28 +153,12 @@ contains
         end do
     end subroutine
 
-    subroutine print_conjuction(name, id, modules, conjunctions_high)
-        implicit none
-
-        character(len=*), intent(in) :: name
-        integer, intent(in)          :: id
-        integer, intent(in)          :: modules(:,:)
-        logical, intent(in)          :: conjunctions_high(:,:)
-        integer                      :: i
-
-        write (*, '(A1, A2, A1)', advance='no') ' ', name, ':'
-        do i = 1, modules(modinfo_number_of_inputs, id)
-            write (*, '(L1)', advance='no') conjunctions_high(i, id)
-        end do
-    end subroutine
-
-    function send_pulses(modules, outputs, inputs, flipflop_ids) result(total_button_presses)
+    function send_pulses(modules, outputs, inputs) result(total_button_presses)
         implicit none
 
         integer, intent(in)  :: modules(:,:)
         integer, intent(in)  :: outputs(:,:)
         integer, intent(in)  :: inputs(:,:)
-        integer, intent(in)  :: flipflop_ids(:)
         integer(int64)       :: total_button_presses
         integer(int64)       :: low_pulses, high_pulses
         logical, allocatable :: flipflops_on(:)
@@ -189,24 +166,20 @@ contains
         type(IntRingBuffer)  :: pulselist
         integer              :: sender_module_id, pulse_type_in, receiver_module_id, &
                                 receiver_module_type, pulse_type_out
-        integer              :: i, j
+        integer              :: i
         logical              :: flipflop_on, conjuction_all_memories_high
-        integer              :: kh_id, mk_id, ml_id, ps_id, &
-                                xc_id, th_id, pd_id, bp_id, &
-                                zh_id, &
-                                rx_id
+        integer              :: xc_id, th_id, pd_id, bp_id
+        integer(int64)       :: xc_cycle, th_cycle, pd_cycle, bp_cycle
 
-        kh_id = name_to_id('kh')
-        mk_id = name_to_id('mk')
-        ml_id = name_to_id('ml')
-        ps_id = name_to_id('ps')
-
+        ! modules to check for pulse cycles lenghts
         xc_id = name_to_id('xc')
         th_id = name_to_id('th')
         pd_id = name_to_id('pd')
         bp_id = name_to_id('bp')
-        zh_id = name_to_id('zh')
-        rx_id = name_to_id('rx')
+        xc_cycle = 0
+        th_cycle = 0
+        pd_cycle = 0
+        bp_cycle = 0
 
         ! flipflops_on list the states of all flipflops
         allocate(flipflops_on(max_modules), source=.false.)
@@ -229,20 +202,10 @@ contains
 
             ! process pulses as long as new ones are created
             do while(.not. pulselist%empty())
-                ! call pulselist%print()
-
                 ! get triplet from pulse list
                 sender_module_id = pulselist%removeFirst()
                 pulse_type_in = pulselist%removeFirst()
                 receiver_module_id = pulselist%removeFirst()
-                if (receiver_module_id == rx_id) then
-                    if (pulse_type_in == pulsetype_low) then
-                        exit button_loop
-                    end if
-                end if
-                ! print *, id_to_name(sender_module_id), &
-                !         ' -', pulsetype_name(pulse_type_in), '-> ', &
-                !         id_to_name(receiver_module_id)
 
                 ! count number of pulse types for final result
                 if (pulse_type_in == pulsetype_high) then
@@ -282,7 +245,6 @@ contains
                     ! first find the correct input memory
                     do i = 1, modules(modinfo_number_of_inputs, receiver_module_id)
                         if (inputs(i, receiver_module_id) == sender_module_id) then
-                            ! print *, id_to_name(sender_module_id), ' is input', i
                             exit
                         end if
                     end do
@@ -298,12 +260,14 @@ contains
                     end do
                     if (conjuction_all_memories_high) then
                         pulse_type_out = pulsetype_low
-                        if (receiver_module_id == kh_id) print *, 'kh', total_button_presses
-                        if (receiver_module_id == mk_id) print *, 'mk', total_button_presses
-                        if (receiver_module_id == ml_id) print *, 'ml', total_button_presses
-                        if (receiver_module_id == ps_id) print *, 'ps', total_button_presses
                     else
                         pulse_type_out = pulsetype_high
+                        ! all of the following modules receiving a low pulse at the same button press will
+                        ! will trigger rx also going low
+                        if (receiver_module_id == xc_id) xc_cycle = total_button_presses - xc_cycle
+                        if (receiver_module_id == th_id) th_cycle = total_button_presses - th_cycle
+                        if (receiver_module_id == pd_id) pd_cycle = total_button_presses - pd_cycle
+                        if (receiver_module_id == bp_id) bp_cycle = total_button_presses - bp_cycle
                     end if
                     do i = 1, modules(modinfo_number_of_outputs, receiver_module_id)
                         call pulselist%addLast(receiver_module_id)
@@ -312,52 +276,18 @@ contains
                     end do
                 end select
             end do  ! do while(.not. pulselist%empty())
-            ! ! print state of flipflop after no more new pulses have been created
-            ! do j = 1, size(flipflop_ids)
-            !     write (*, '(L1)', advance='no') flipflops_on(flipflop_ids(j))
-            ! end do
-            ! call print_conjuction('kh', kh_id, modules, conjunctions_high)
-            ! call print_conjuction('mk', mk_id, modules, conjunctions_high)
-            ! call print_conjuction('ml', ml_id, modules, conjunctions_high)
-            ! call print_conjuction('ps', ps_id, modules, conjunctions_high)
-
-            ! call print_conjuction('xc', xc_id, modules, conjunctions_high)
-            ! call print_conjuction('th', th_id, modules, conjunctions_high)
-            ! call print_conjuction('pd', pd_id, modules, conjunctions_high)
-            ! call print_conjuction('bp', bp_id, modules, conjunctions_high)
-
-            ! call print_conjuction('zh', zh_id, modules, conjunctions_high)
-
-            ! call print_conjuction('rx', rx_id, modules, conjunctions_high)
-            ! print *
-            !!! exit
+            ! check if all cycles have been found
+            if (xc_cycle /= 0) then
+                if (th_cycle /= 0) then
+                    if (pd_cycle /= 0) then
+                        if (bp_cycle /= 0) then
+                            exit
+                        end if
+                    end if
+                end if
+            end if
         end do button_loop ! do
-    end function
-
-    function filter_flipflops(module_ids, modules) result(flipflop_ids)
-        implicit none
-
-        integer, intent(in)  :: module_ids(:)
-        integer, intent(in)  :: modules(:,:)
-        integer, allocatable :: flipflop_ids(:)
-        integer              :: i, id, flipflopcount
-
-        flipflopcount = 0
-        do i = 1, size(module_ids)
-            id = module_ids(i)
-            if (modules(modinfo_modtype, id) == modtype_flipflop) then
-                flipflopcount = flipflopcount + 1
-            end if
-        end do
-        allocate(flipflop_ids(flipflopcount))
-        flipflopcount = 0
-        do i = 1, size(module_ids)
-            id = module_ids(i)
-            if (modules(modinfo_modtype, id) == modtype_flipflop) then
-                flipflopcount = flipflopcount + 1
-                flipflop_ids(flipflopcount) = id
-            end if
-        end do
+        total_button_presses = lcm([xc_cycle, th_cycle, pd_cycle, bp_cycle])
     end function
 
     integer(int64) function solve(filename)
@@ -367,29 +297,14 @@ contains
         integer(int64)                :: total_button_presses
         character(len=:), allocatable :: lines(:)
         integer, allocatable          :: module_ids(:), &
-                                         modules(:,:), outputs(:,:), inputs(:,:), &
-                                         flipflop_ids(:)
+                                         modules(:,:), outputs(:,:), inputs(:,:)
         ! integer                       :: i, id
 
         lines = readinputfile_asstringarray(filename, maxlinelength)
         call read_wiring(lines, module_ids, modules, outputs, inputs)
-        ! print *, module_ids
-        ! do i = 1, size(module_ids)
-        !     id = module_ids(i)
-        !     print *, 'module: ', id_to_name(id), ' (', id, ')'
-        !     print *, modules(:, id)
-        !     print *, outputs(:, id)
-        !     print *, inputs(:, id)
-        ! end do
 
-        flipflop_ids = filter_flipflops(module_ids, modules)
-        ! print *, flipflop_ids
-        !!!!! total_button_presses = send_pulses(modules, outputs, inputs, flipflop_ids)
-        ! solve = total_button_presses
-
-        ! lcm of the cycle lengths of the 4 conjuctions 
-        ! kh_id, mk_id, ml_id, ps_id
-        solve = 228134431501037_int64
+        total_button_presses = send_pulses(modules, outputs, inputs)
+        solve = total_button_presses
     end function
 
 end module day20b
