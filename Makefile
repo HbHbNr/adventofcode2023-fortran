@@ -425,12 +425,12 @@ $(OBJ)/day21a_test_driver.o: $(OBJ)/day21a_test.o $(OBJ)/day21a.o $(OBJ)/util.o 
 $(BIN)/day21a: $(OBJ)/day21a_main.o $(OBJ)/day21a.o $(OBJ)/util.o $(OBJ)/class_intringbuffer.o
 $(BIN)/day21a_test_driver: $(OBJ)/day21a_test_driver.o $(OBJ)/day21a_test.o $(OBJ)/day21a.o $(OBJ)/util.o $(OBJ)/fruit.o $(OBJ)/class_intringbuffer.o
 
-# $(OBJ)/day21b.o: $(OBJ)/util.o
-# $(OBJ)/day21b_main.o: $(OBJ)/day21b.o $(OBJ)/util.o
-# $(OBJ)/day21b_test.o: $(OBJ)/day21b.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(OBJ)/day21b_test_driver.o: $(OBJ)/day21b_test.o $(OBJ)/day21b.o $(OBJ)/util.o $(OBJ)/fruit.o
-# $(BIN)/day21b: $(OBJ)/day21b_main.o $(OBJ)/day21b.o $(OBJ)/util.o
-# $(BIN)/day21b_test_driver: $(OBJ)/day21b_test_driver.o $(OBJ)/day21b_test.o $(OBJ)/day21b.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day21b.o: $(OBJ)/util.o $(OBJ)/class_intringbuffer.o
+$(OBJ)/day21b_main.o: $(OBJ)/day21b.o $(OBJ)/util.o
+$(OBJ)/day21b_test.o: $(OBJ)/day21b.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(OBJ)/day21b_test_driver.o: $(OBJ)/day21b_test.o $(OBJ)/day21b.o $(OBJ)/util.o $(OBJ)/fruit.o
+$(BIN)/day21b: $(OBJ)/day21b_main.o $(OBJ)/day21b.o $(OBJ)/util.o $(OBJ)/class_intringbuffer.o
+$(BIN)/day21b_test_driver: $(OBJ)/day21b_test_driver.o $(OBJ)/day21b_test.o $(OBJ)/day21b.o $(OBJ)/util.o $(OBJ)/fruit.o $(OBJ)/class_intringbuffer.o
 
 # $(OBJ)/day22a.o: $(OBJ)/util.o
 # $(OBJ)/day22a_main.o: $(OBJ)/day22a.o $(OBJ)/util.o
