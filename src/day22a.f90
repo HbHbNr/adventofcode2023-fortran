@@ -50,11 +50,11 @@ contains
             x2 = bricks(x2i, i)
             y2 = bricks(y2i, i)
             z2 = bricks(z2i, i)
-            print *, x1, y1, z1, x2, y2, z2
+            ! print *, x1, y1, z1, x2, y2, z2
             do x = x1, x2
                 do y = y1, y2
                     do z = z1, z2
-                        print *, '   ', x, y, z
+                        ! print *, '   ', x, y, z
                         tower(x, y, z) = i
                     end do
                 end do
@@ -62,25 +62,87 @@ contains
         end do
     end subroutine
 
+    subroutine drop_bricks(bricks, tower)
+        implicit none
+
+        integer, intent(inout) :: bricks(:,:)
+        integer, intent(inout) :: tower(0:,0:,1:)
+        integer                :: b, x, y, z, x1, y1, z1, x2, y2, z2, ztest
+        logical                :: ztest_free, dropped_one
+
+        ! do b = 1, size(bricks, 2)
+        !     print *, bricks(:, b)
+        ! end do
+
+        dropped_one = .true.
+        do while(dropped_one)
+            dropped_one = .false.
+            do b = 1, size(bricks, 2)
+                ! print *, bricks(:, b)
+
+                ! get coordinate of the current brick
+                z1 = bricks(z1i, b)  ! guaranteed to be the lowest point, always z1 <= z2
+                if (z1 < 2) cycle  ! dropping deeper is not possible
+                x1 = bricks(x1i, b)
+                y1 = bricks(y1i, b)
+                x2 = bricks(x2i, b)
+                y2 = bricks(y2i, b)
+                z2 = bricks(z2i, b)
+
+                ! test if area directly below the current brick is totally free
+                ztest = z1 - 1
+                ztest_free = .true.
+                xloop: do x = x1, x2
+                    do y = y1, y2
+                        ! do not iterate over z, use ztest
+                        if (tower(x, y, ztest) /= 0) then
+                            ztest_free = .false.
+                            exit xloop
+                        end if
+                    end do
+                end do xloop
+
+                ! if area directly below the current brick is totally free, drop it by one unit
+                if (ztest_free) then
+                    print *, 'dropping brick', b
+                    dropped_one = .true.
+                    bricks(:, b) = bricks(:, b) - [0, 0, 1, 0, 0, 1]
+                    if (z1 == z2) then
+                        ! horizontal brick because z1==z2
+                        do x = x1, x2
+                            do y = y1, y2
+                                tower(x, y, z1) = 0  ! clear old brick
+                                tower(x, y, ztest) = b  ! add new brick
+                            end do
+                        end do
+                    else
+                        ! vertikal brick, so x1==x2 and y1==y2
+                        tower(x1, y1, z2) = 0  ! clear topmost brick
+                        tower(x1, y1, ztest) = b  ! add new lowest brick
+                    end if
+                end if
+            end do
+        end do
+        ! do b = 1, size(bricks, 2)
+        !     print *, bricks(:, b)
+        ! end do
+    end subroutine
+
     function count_disintegratable_bricks(bricks, tower) result(disintegration_count)
         implicit none
 
-        integer, intent(in)           :: bricks(:,:)
-        integer, intent(out)          :: tower(0:,0:,1:)
-        integer(int64)                :: disintegration_count
-        integer                       :: i
+        integer, intent(in) :: bricks(:,:)
+        integer, intent(in) :: tower(0:,0:,1:)
+        integer(int64)      :: disintegration_count
 
         disintegration_count = 0
-        do i = 1, size(bricks, 2)
-            disintegration_count = disintegration_count + 1
-        end do
     end function
 
     subroutine print_tower(tower)
         implicit none
 
         integer, intent(in) :: tower(0:,0:,1:)
-        integer             :: x, y, z
+        integer             :: y, z
 
         do z = size(tower, 3), 1, -1
             do y = lbound(tower, 2), ubound(tower, 2)
@@ -105,7 +167,9 @@ contains
         lines = readinputfile_asstringarray(filename, maxlinelength)
         call create_tower(lines, bricks, tower, maxx)
         call print_tower(tower)
-        ! disintegration_count = count_disintegratable_bricks(bricks, tower)
+        call drop_bricks(bricks, tower)
+        call print_tower(tower)
+        disintegration_count = count_disintegratable_bricks(bricks, tower)
 
         solve = disintegration_count
     end function
