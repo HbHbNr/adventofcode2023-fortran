@@ -76,8 +76,6 @@ contains
         do while(dropped_one)
             dropped_one = .false.
             do b = 1, size(bricks, 2)
-                ! print *, bricks(:, b)
-
                 ! get coordinates of the current brick
                 z1 = bricks(z1i, b)  ! guaranteed to be the lowest point, always z1 <= z2
                 if (z1 < 2) cycle  ! dropping deeper is not possible
@@ -102,7 +100,6 @@ contains
 
                 ! if area directly below the current brick is totally free, drop it by one unit
                 if (ztest_free) then
-                    ! print *, 'dropping brick', b
                     dropped_one = .true.
                     bricks(:, b) = bricks(:, b) - [0, 0, 1, 0, 0, 1]
                     if (z1 == z2) then
@@ -217,7 +214,6 @@ contains
         integer(int64)                :: disintegration_count
 
         lines = readinputfile_asstringarray(filename, maxlinelength)
-        ! lines = lines(1:50)
 
         call create_tower(lines, bricks, tower, maxx)
 

@@ -24,8 +24,7 @@ contains
         integer(int64) :: result
 
         result = solve('../inputfiles/day22_input.txt', 9)
-        call assert_true (-1 == result)
-        ! 2153 is too low
+        call assert_true (96356 == result)
     end subroutine
 
 end module day22b_test
