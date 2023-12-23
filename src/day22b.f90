@@ -1,5 +1,5 @@
-!> Solution for https://adventofcode.com/2023/day/22 part a
-module day22a
+!> Solution for https://adventofcode.com/2023/day/22 part b
+module day22b
     use iso_fortran_env, only : int64
     use util, only : readinputfile_asstringarray, code_0, code_9
     implicit none
@@ -123,16 +123,17 @@ contains
         end do  ! while(dropped_one)
     end subroutine
 
-    function count_disintegratable_bricks(bricks, tower) result(disintegration_count)
+    function count_chain_reaction_bricks(bricks, tower) result(chain_reaction_count)
         implicit none
 
         integer, intent(in)  :: bricks(:,:)
         integer, intent(in)  :: tower(0:,0:,1:)
-        integer(int64)       :: disintegration_count
+        integer(int64)       :: chain_reaction_count
         logical, allocatable :: brick_supports_brick(:,:)
-        integer              :: b, bbelow, x, y, x1, y1, z1, x2, y2, supporting_brick
-        logical              :: only_support
-        logical, allocatable :: disintegratable_bricks(:)
+        integer              :: b, bbelow, x, y, x1, y1, z1, x2, y2
+        integer              :: supporting_bricks_needed, supporting_bricks_falling, falling_brick, falling_bricks_count
+        ! logical              :: only_support
+        logical, allocatable :: falling_bricks(:), dropped_one
 
         ! track which brick is supporting which other bricks
         allocate(brick_supports_brick(size(bricks, 2), size(bricks, 2)), source=.false.)
@@ -161,33 +162,49 @@ contains
             end do
         end do
 
-        ! count disintegratable_bricks
-        allocate(disintegratable_bricks(size(bricks, 2)), source=.false.)
+        ! iterate all bricks as the initial brick being removed
+        allocate(falling_bricks(size(bricks, 2)))
+        chain_reaction_count = 0
         bbelow_loop: do bbelow = 1, size(brick_supports_brick, 1)
-            ! ! assume b is not the only support
-            disintegratable_bricks(bbelow) = .true.
+            ! print *, bbelow
+            if (count(brick_supports_brick(bbelow, :)) == 0) then
+                ! print *, bbelow, 'is not supporting any other brick'
+                cycle bbelow_loop
+            end if
 
-            do b = 1, size(brick_supports_brick, 2)
-                if (brick_supports_brick(bbelow, b)) then
-                    ! bbelow supports b, but is it the only brick supporting b?
-                    only_support = .true.
-                    do supporting_brick = 1, size(brick_supports_brick, 1)
-                        if (supporting_brick == bbelow) cycle
-                        if (brick_supports_brick(supporting_brick, b)) then
-                            ! bbelow is not the only brick supporting b, also supporting_brick
-                            only_support = .false.
+            falling_bricks = .false.
+            falling_bricks(bbelow) = .true.  ! initial brick to fall
+            dropped_one = .true.
+            do while(dropped_one)
+                dropped_one = .false.
+                do b = 1, size(bricks, 2)
+                    if (falling_bricks(b)) cycle  ! this brick is already falling
+                    ! check if all bricks supporting this brick are falling
+                    supporting_bricks_needed = count(brick_supports_brick(:, b))
+                    if (supporting_bricks_needed == 0) cycle
+                    ! print *, b, 'needs', supporting_bricks_needed, 'supporting bricks'
+
+                    ! check which of the supporting bricks are already falling
+                    supporting_bricks_falling = 0
+                    do falling_brick = 1, size(falling_bricks)
+                        if (.not. falling_bricks(falling_brick)) cycle  ! falling_brick is not falling
+                        if (brick_supports_brick(falling_brick, b)) then
+                            ! falling_brick is falling
+                            supporting_bricks_falling = supporting_bricks_falling + 1
                         end if
                     end do
-                    if (only_support) then
-                        ! assumption was wrong, b is the only support and must not be desintegrated
-                        disintegratable_bricks(bbelow) = .false.
-                        cycle bbelow_loop
-                    end if
-                end if
-            end do
-        end do bbelow_loop
 
-        disintegration_count = count(disintegratable_bricks, 1)
+                    if (supporting_bricks_needed == supporting_bricks_falling) then
+                        ! all supporting bricks are falling, so this brick is also falling
+                        falling_bricks(b) = .true.
+                        ! print *, b, 'now falling because', supporting_bricks_needed, 'supporting bricks are falling'
+                    end if
+                end do
+            end do  ! while(dropped_one)
+            falling_bricks_count = count(falling_bricks)
+            ! print *, falling_bricks_count - 1, ' bricks would fall when removing', bbelow
+            chain_reaction_count = chain_reaction_count + falling_bricks_count - 1
+        end do bbelow_loop
     end function
 
     subroutine print_tower(tower)
@@ -223,9 +240,9 @@ contains
 
         call drop_bricks(bricks, tower)
 
-        disintegration_count = count_disintegratable_bricks(bricks, tower)
+        disintegration_count = count_chain_reaction_bricks(bricks, tower)
 
         solve = disintegration_count
     end function
 
-end module day22a
+end module day22b
