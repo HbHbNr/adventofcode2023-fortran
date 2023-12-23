@@ -80,7 +80,7 @@ contains
             do b = 1, size(bricks, 2)
                 ! print *, bricks(:, b)
 
-                ! get coordinate of the current brick
+                ! get coordinates of the current brick
                 z1 = bricks(z1i, b)  ! guaranteed to be the lowest point, always z1 <= z2
                 if (z1 < 2) cycle  ! dropping deeper is not possible
                 x1 = bricks(x1i, b)
@@ -131,11 +131,66 @@ contains
     function count_disintegratable_bricks(bricks, tower) result(disintegration_count)
         implicit none
 
-        integer, intent(in) :: bricks(:,:)
-        integer, intent(in) :: tower(0:,0:,1:)
-        integer(int64)      :: disintegration_count
+        integer, intent(in)  :: bricks(:,:)
+        integer, intent(in)  :: tower(0:,0:,1:)
+        integer(int64)       :: disintegration_count
+        logical, allocatable :: brick_supports_brick(:,:)
+        integer              :: b, bbelow, x, y, x1, y1, z1, x2, y2, supporting_bricks
+        logical              :: none_above
+        logical, allocatable :: disintegratable_bricks(:)
 
+        ! track which brick is supporting which other bricks
+        allocate(brick_supports_brick(size(bricks, 2), size(bricks, 2)), source=.false.)
+        allocate(disintegratable_bricks(size(bricks, 2)), source=.false.)
+
+        ! track which brick is supporting which other bricks
+        do b = 1, size(bricks, 2)
+            ! get coordinates of the current brick
+            z1 = bricks(z1i, b)  ! guaranteed to be the lowest point, always z1 <= z2
+            if (z1 < 2) cycle  ! support below is not possible
+            x1 = bricks(x1i, b)
+            y1 = bricks(y1i, b)
+            x2 = bricks(x2i, b)
+            y2 = bricks(y2i, b)
+            ! z2 not needed for this test
+
+            ! test if area directly below the current brick is totally free
+            do x = x1, x2
+                do y = y1, y2
+                    ! do not iterate over z, use z1
+                    bbelow = tower(x, y, z1 - 1)
+                    if (bbelow /= 0) then
+                        ! brick below the current one found
+                        brick_supports_brick(bbelow, b) = .true.
+                        print *, bbelow, 'supports', b
+                    end if
+                end do
+            end do
+        end do
+
+        ! count disintegratable_bricks
         disintegration_count = 0
+        do bbelow = 1, size(brick_supports_brick, 1)
+            none_above = .true.
+            do b = 1, size(brick_supports_brick, 2)
+                if (brick_supports_brick(bbelow, b)) then
+                    ! bbelow supports b, but is i the only brick supporting b?
+                    supporting_bricks = count(brick_supports_brick(:, b), 1)
+                    if (supporting_bricks > 1) then
+                        print *, bbelow, 'is not the only brick supporting', b
+                        disintegratable_bricks(bbelow) = .true.
+                    end if
+                    none_above = .false.
+                end if
+            end do
+            if (none_above .eqv. .true.) then
+                ! bricks with no bricks above can also be disintegrated
+                disintegratable_bricks(bbelow) = .true.
+            end if
+        end do
+
+        print *, disintegratable_bricks
+        disintegration_count = count(disintegratable_bricks, 1)
     end function
 
     subroutine print_tower(tower)
