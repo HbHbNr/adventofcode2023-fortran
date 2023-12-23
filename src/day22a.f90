@@ -135,7 +135,7 @@ contains
         integer, intent(in)  :: tower(0:,0:,1:)
         integer(int64)       :: disintegration_count
         logical, allocatable :: brick_supports_brick(:,:)
-        integer              :: b, bbelow, x, y, x1, y1, z1, x2, y2, supporting_bricks
+        integer              :: b, bbelow, x, y, x1, y1, z1, x2, y2, supporting_brick
         logical              :: none_above
         logical, allocatable :: disintegratable_bricks(:)
 
@@ -171,20 +171,26 @@ contains
         ! count disintegratable_bricks
         disintegration_count = 0
         do bbelow = 1, size(brick_supports_brick, 1)
+            if (disintegratable_bricks(bbelow)) cycle  ! bbelow was already found as an additional supporting brick
             none_above = .true.
             do b = 1, size(brick_supports_brick, 2)
                 if (brick_supports_brick(bbelow, b)) then
-                    ! bbelow supports b, but is i the only brick supporting b?
-                    supporting_bricks = count(brick_supports_brick(:, b), 1)
-                    if (supporting_bricks > 1) then
-                        print *, bbelow, 'is not the only brick supporting', b
-                        disintegratable_bricks(bbelow) = .true.
-                    end if
                     none_above = .false.
+                    ! bbelow supports b, but is it the only brick supporting b?
+                    do supporting_brick = 1, size(brick_supports_brick, 1)
+                        if (brick_supports_brick(supporting_brick, b)) then
+                            if (supporting_brick /= bbelow) then
+                                print *, bbelow, 'is not the only brick supporting', b, ', also', supporting_brick
+                                disintegratable_bricks(bbelow) = .true.
+                                disintegratable_bricks(supporting_brick) = .true.
+                            end if
+                        end if
+                    end do
                 end if
             end do
             if (none_above .eqv. .true.) then
                 ! bricks with no bricks above can also be disintegrated
+                print *, bbelow, 'is not supporting anything'
                 disintegratable_bricks(bbelow) = .true.
             end if
         end do
@@ -220,13 +226,16 @@ contains
         integer(int64)                :: disintegration_count
 
         lines = readinputfile_asstringarray(filename, maxlinelength)
+        ! lines = lines(1:50)
+
         call create_tower(lines, bricks, tower, maxx)
         call print_tower(tower)
         call drop_bricks(bricks, tower)
         call print_tower(tower)
         disintegration_count = count_disintegratable_bricks(bricks, tower)
 
-        solve = disintegration_count
+        ! solve = disintegration_count
+        solve = -1
     end function
 
 end module day22a

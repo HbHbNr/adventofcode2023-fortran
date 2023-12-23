@@ -6,7 +6,7 @@ program day22a_main
 
     integer(int64) :: result
 
-    result = solve('inputfiles/day22_example.txt', 2)
-    ! result = solve('inputfiles/day22_input.txt', 9)
+    ! result = solve('inputfiles/day22_example.txt', 2)
+    result = solve('inputfiles/day22_input.txt', 9)
     call printresultline_int64('22a', result)
 end program day22a_main
