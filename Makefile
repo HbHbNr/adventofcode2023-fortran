@@ -1,7 +1,7 @@
 # disable default rules and default variables
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
-.PHONY: all runall runbenchmark tests runtests fruitpytests info clean
+.PHONY: all runall runall_qc runbenchmark tests runtests fruitpytests info clean
 
 DEBUG := 1
 SRC := src
@@ -24,6 +24,9 @@ all: $(BINARIES)
 
 runall: $(BINARIES)
 	for BINARY in $(BINARIES); do $${BINARY}; done
+
+runall_qc: $(BINARIES)
+	for BINARY in $(filter-out $(BIN)/day23b,$(BINARIES)); do $${BINARY}; done
 
 runbenchmark: $(BINARIES)
 	for BINARY in $(BINARIES); do /usr/bin/time -f "$${BINARY}: %es" $${BINARY} > /dev/null; done

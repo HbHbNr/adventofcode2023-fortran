@@ -2,6 +2,11 @@
 
 FRUITPYTESTS=$(make -pn | grep 'FRUITPYTESTS :=' | cut -d' ' -f 3-)
 
+if [ x$1 = xQC ]; then
+    echo 'Note: skipping long running test for day 23b'
+    FRUITPYTESTS=$(echo $FRUITPYTESTS | sed 's# fruitpy/day23b.py##')
+fi
+
 for FRUITPYTEST in $FRUITPYTESTS; do
     echo "******************** ${FRUITPYTEST} ********************"
     python3 ${FRUITPYTEST}
